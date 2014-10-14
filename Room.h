@@ -19,10 +19,9 @@ We let the compiler supply the destructor and copy/move constructors and assignm
 
 #include <iostream>
 #include <fstream>
-#include "Ordered_list.h"
+#include <string>
 #include "Person.h"
 #include "Meeting.h"
-#include "String.h"
 
 class Room {
 public:

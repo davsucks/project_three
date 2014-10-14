@@ -20,7 +20,7 @@ CFLAGS = -std=c++11 -pedantic-errors -Wall -c
 #no load flags defined, but -l would be used to include a special library
 LFLAGS = 
 
-OBJS = p2_main.o p2_globals.o Room.o Person.o Meeting.o Utility.o String.o
+OBJS = p2_main.o p2_globals.o Room.o Person.o Meeting.o Utility.o
 PROG = proj2exe
 
 default: $(PROG)
@@ -31,23 +31,17 @@ debug: $(PROG)
 $(PROG): $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) -o $(PROG)
 
-p2_main.o: p2_main.cpp p2_globals.h Ordered_list.h Room.h Meeting.h Person.h Utility.h String.h
+p2_main.o: p2_main.cpp p2_globals.h Room.h Meeting.h Person.h Utility.h
 	$(CC) $(CFLAGS) p2_main.cpp
 
-Room.o: Room.cpp Room.h Ordered_list.h Meeting.h Utility.h
+Room.o: Room.cpp Room.h Meeting.h Utility.h
 	$(CC) $(CFLAGS) Room.cpp
 
-Meeting.o: Meeting.cpp Meeting.h Ordered_list.h Person.h Utility.h String.h
+Meeting.o: Meeting.cpp Meeting.h Person.h Utility.h
 	$(CC) $(CFLAGS) Meeting.cpp
 
-Person.o: Person.cpp Person.h Utility.h String.h
+Person.o: Person.cpp Person.h Utility.h
 	$(CC) $(CFLAGS) Person.cpp
-
-String.o: String.cpp String.h Utility.h 
-	$(CC) $(CFLAGS) String.cpp
-
-Ordered_list.o: Ordered_list.cpp Utility.h
-	$(CC) $(CFLAGS) Ordered_list.cpp
 
 p2_globals.o: p2_globals.cpp p2_globals.h 
 	$(CC) $(CFLAGS) p2_globals.cpp

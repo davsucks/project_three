@@ -1,7 +1,6 @@
 #include "Meeting.h"
 #include "Utility.h"
 #include <stdexcept>
-#include <cassert>
 using namespace std;
 
 /* Meeting class - this class represents a Meeting in terms of a time, topic, and 
@@ -33,7 +32,7 @@ Meeting::Meeting(std::ifstream& is, const Ordered_list<const Person*, Less_than_
 	is >> topic;
 	is >> num_participants;
 	// read in all participants
-	String lastname;
+	std::string lastname;
 	auto itr = people.begin();
 	for(int i = 0; i < num_participants && is.good(); ++i) {
 		is >> lastname;

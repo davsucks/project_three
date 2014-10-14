@@ -1,5 +1,4 @@
 #include "Ordered_list.h"
-#include "String.h"
 #include "Person.h"
 #include "Meeting.h"
 #include "Room.h"
@@ -7,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <string>
 using namespace std;
 
 // Custom Types
@@ -213,7 +213,7 @@ int main()
 				break;
 		}
 		} /* end of try block */
-		catch (String_exception& x) {
+		catch (std::string_exception& x) {
 			cout << x.msg << endl;
 			cin.clear();
 			skip_line();
@@ -270,7 +270,7 @@ room_iterator_t read_no_and_get_room(room_list_t& rooms)
 // PI and subfunction definitions
 void pi(people_list_t& people)
 {
-	String lastname;
+	std::string lastname;
 	cin >> lastname;
 	Person probe(lastname);
 	auto person = people.find(&probe);
@@ -350,13 +350,7 @@ void pg(people_list_t& people)
 // PA and subfunctino definitions
 void pa(people_list_t& people, room_list_t& rooms)
 {
- 	cout <<"Memory allocations:" << endl;
- 	cout <<"Strings: " << String::get_number() << " with " << String::get_total_allocation() << " bytes total" << endl;
- 	cout <<"Persons: " << people.size() << endl;
- 	cout <<"Meetings: " << num_meetings(rooms) << endl;
- 	cout <<"Rooms: " << rooms.size() << endl;
-	cout << "Lists: " << g_Ordered_list_count << endl;
- 	cout <<"List Nodes: " << g_Ordered_list_Node_count << endl;
+ 	
 }
 int num_meetings(room_list_t& rooms)
 {
@@ -368,7 +362,7 @@ int num_meetings(room_list_t& rooms)
 
 void ai(people_list_t& people)
 {
-	String firstname, lastname, phoneno;
+	std::string firstname, lastname, phoneno;
 	cin >> firstname >> lastname >> phoneno;
 	const Person* new_person = new Person(firstname, lastname, phoneno);
 	if (people.find(new_person) != people.end()) {
@@ -401,7 +395,7 @@ void am(room_list_t& rooms)
 	
 	int time = read_time();
 
-	String topic;
+	std::string topic;
 	cin >> topic;
 
 	Meeting meeting(time, topic);
@@ -416,7 +410,7 @@ void ap(room_list_t& rooms, people_list_t& people)
 	int time = read_time();
 	Meeting& meeting = room->get_Meeting(time);
 
-	String lastname;
+	std::string lastname;
 	cin >> lastname;
 	Person probe(lastname);
 	auto person = people.find(&probe);
@@ -465,7 +459,7 @@ void rm(room_list_t& rooms)
 
 void di(room_list_t& rooms, people_list_t& people)
 {
-	String lastname;
+	std::string lastname;
 	cin >> lastname;
 
 	Person probe(lastname);
@@ -513,7 +507,7 @@ void dp(room_list_t& rooms, people_list_t& people)
 
 	Meeting& meeting = room->get_Meeting(time);
 
-	String lastname;
+	std::string lastname;
 	cin >> lastname;
 	Person probe(lastname);
 	auto person = people.find(&probe);
@@ -566,7 +560,7 @@ void da_no_messages(room_list_t& rooms, people_list_t& people)
 
 void sd(room_list_t& rooms, people_list_t& people)
 {
-	String filename;
+	std::string filename;
 	cin >> filename;
 
 	ofstream output_file(filename.c_str());
@@ -593,7 +587,7 @@ void sd(room_list_t& rooms, people_list_t& people)
 
 void ld(room_list_t& rooms, people_list_t& people)
 {
-	String filename;
+	std::string filename;
 	cin >> filename;
 
 	ifstream input_file(filename.c_str());

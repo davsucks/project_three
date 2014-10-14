@@ -16,13 +16,12 @@ We let the compiler supply the destructor and the copy/move constructors and ass
 
 #include <fstream>
 #include <iostream>
-#include "String.h"
-#include "Ordered_list.h"
+#include <string>
 #include "Person.h"
 
 class Meeting {
 public:
-	Meeting(int time_, const String& topic_)
+	Meeting(int time_, const std::string& topic_)
 		: time(time_), topic(topic_)
 		{participants = Participants_t();}
 	// construct a Meeting with only a time
@@ -67,7 +66,7 @@ private:
 	Participants_t participants;
 	
 	int time;
-	String topic;
+	std::string topic;
 };
 
 // Print the Meeting data as follows:

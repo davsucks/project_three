@@ -1,20 +1,19 @@
-/* A Person object simply contains Strings for a person's data.
+/* A Person object simply contains std::strings for a person's data.
 Once created, the data cannot be modified. */
 
 #ifndef PERSON_H
 #define PERSON_H
 
-#include "String.h"
-#include "p2_globals.h"
+#include <string>
 #include <fstream>
 
 class Person {
 public:
-	Person(const String& firstname_, const String& lastname_, const String& phoneno_)
+	Person(const std::string& firstname_, const std::string& lastname_, const std::string& phoneno_)
 		: firstname(firstname_), lastname(lastname_), phoneno(phoneno_)
 		{}
 	// construct a Person object with only a lastname
-	Person(const String& lastname_)
+	Person(const std::string& lastname_)
 		: lastname(lastname_)
 		{}
 
@@ -34,7 +33,7 @@ public:
 	Person(std::ifstream& is);
 	
 	// Accessors
-	String get_lastname() const
+	std::string get_lastname() const
 		{return lastname;}
 	
 	// Write a Person's data to a stream in save format with final endl.
@@ -47,9 +46,9 @@ public:
 	friend std::ostream& operator<< (std::ostream& os, const Person& person);
 
 private:
-	String firstname;
-	String lastname;
-	String phoneno;
+	std::string firstname;
+	std::string lastname;
+	std::string phoneno;
 
 };
 
