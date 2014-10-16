@@ -17,11 +17,13 @@ We let the compiler supply the destructor and copy/move constructors and assignm
 #ifndef ROOM_H
 #define ROOM_H
 
+#include "Person.h"
+#include "Meeting.h"
+#include "Utility.h"
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "Person.h"
-#include "Meeting.h"
+#include <map>
 
 class Room {
 public:
@@ -35,7 +37,7 @@ public:
 	// No check made for whether the Room already exists or not.
 	// Throw Error exception if invalid data discovered in file.
 	// Input for a member variable value is read directly into the member variable.
-	 Room(std::ifstream& is, const Ordered_list<const Person*, Less_than_ptr<const Person*> >& people_list);
+	 Room(std::ifstream& is, const people_list_t& people_list);
 
 	// Accessors
 	int get_room_number() const
@@ -75,7 +77,7 @@ public:
 	friend std::ostream& operator<< (std::ostream& os, const Room& room);
 
 private:
-	using Meetings_t = Ordered_list<Meeting>;
+	using Meetings_t = std::map<int, Meeting>;
 	// your choice of other private member variables and functions
 	int room_number;
 	Meetings_t meetings;

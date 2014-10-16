@@ -18,6 +18,7 @@ We let the compiler supply the destructor and the copy/move constructors and ass
 #include <iostream>
 #include <string>
 #include "Person.h"
+#include "Utility.h"
 
 class Meeting {
 public:
@@ -34,7 +35,7 @@ public:
 	// No check made for whether the Meeting already exists or not.
 	// Person list is needed to resolve references to meeting participants
 	// Input for a member variable value is read directly into the member variable.
-	Meeting(std::ifstream& is, const Ordered_list<const Person*, Less_than_ptr<const Person*> >& people);
+	Meeting(std::ifstream& is, const people_list_t& people);
 
 	// accessors
 	int get_time() const
@@ -62,7 +63,7 @@ public:
 		
 private:
 
-	using Participants_t = Ordered_list<const Person*, Less_than_ptr<const Person*>>;
+	using Participants_t = people_list_t;
 	Participants_t participants;
 	
 	int time;

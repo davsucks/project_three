@@ -1,19 +1,19 @@
-#include "Ordered_list.h"
 #include "Person.h"
 #include "Meeting.h"
 #include "Room.h"
-#include "p2_globals.h"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <list>
+#include <vector>
+#include <map>
 using namespace std;
 
-// Custom Types
-using people_list_t = Ordered_list<const Person*, Less_than_ptr<const Person*> >;
-using people_iterator_t = people_list_t::Iterator;
-using room_list_t = Ordered_list<Room>;
-using room_iterator_t = room_list_t::Iterator;
+
+// types for the command map
+// using (*CommandFunction)(void) = void;
+// using script_map = map<string, CommandFunction>;
 
 // MAIN HELPER FUNCTIONS
 
@@ -71,6 +71,7 @@ void ld(room_list_t&, people_list_t&);
 
 int main() 
 {
+
 	people_list_t people;
 	room_list_t rooms;
 	char action;
@@ -213,13 +214,8 @@ int main()
 				break;
 		}
 		} /* end of try block */
-		catch (std::string_exception& x) {
-			cout << x.msg << endl;
-			cin.clear();
-			skip_line();
-		}
-		catch (runtime_error& x) {
-			cout << x.what() << endl;
+		catch (Error& e) {
+			cout << e.msg << endl;
 			cin.clear();
 			skip_line();
 		}
@@ -238,12 +234,13 @@ void skip_line()
 
 int read_room_number()
 {
-	assert(cin);
+	// removing for now
+	// assert(cin);
 	int room_number;
 	cin >> room_number;
 	if (!cin) {
 		cin.clear();
-		throw runtime_error{"Could not read an integer value!"};
+		throw Error("Could not read an integer value!");
 	}
 	check_room_no_in_range(room_number);
 	return room_number;
@@ -251,12 +248,13 @@ int read_room_number()
 
 int read_time()
 {
-	assert(cin);
+	// removing for now
+	// assert(cin);
 	int time;
 	cin >> time;
 	if (!cin) {
 		cin.clear();
-		throw runtime_error{"Could not read an integer value!"};
+		throw Error("Could not read an integer value!");
 	}
 	check_time_in_range(time);
 	return time;
@@ -273,10 +271,10 @@ void pi(people_list_t& people)
 	std::string lastname;
 	cin >> lastname;
 	Person probe(lastname);
-	auto person = people.find(&probe);
-	if (person == people.end())
-		throw runtime_error{"No person with that name!"};
-	cout << **person << endl;
+	// auto person = people.find(&probe);
+	// if (person == people.end())
+	// 	throw Error("No person with that name!");
+	// cout << **person << endl;
 }
 
 // PR and subfunction definitions
@@ -291,17 +289,18 @@ void pr(room_list_t& rooms)
 void check_room_no_in_range(int room_number)
 {
 	if (room_number < 0)
-		throw runtime_error{"Room number is not in range!"};
+		throw Error("Room number is not in range!");
 }
 /*	returns an iterator to the room given by room_number
 	if no room of that number exists, throws the appropriate error */
 room_iterator_t get_room(room_list_t& rooms, int room_number)
 {
 	Room probe(room_number);
-	auto room = rooms.find(probe);
-	if (room == rooms.end())
-		throw runtime_error{"No room with that number!"};
-	return room;
+	
+	// auto room = rooms.find(probe);
+	// if (room == rooms.end())
+	// 	throw Error("No room with that number!");
+	// return room;
 }
 
 // PM and subfunction definitions
@@ -321,30 +320,30 @@ void check_time_in_range(int time) {
 		return;
 	}
 	else {
-		throw runtime_error{"Time is not in range!"};
+		throw Error("Time is not in range!");
 	}
 }
 
 void ps(room_list_t& rooms)
 {
-	if (!rooms.size())
+	if (rooms.empty())
 		cout << "List of rooms is empty" << endl;
 	else
 		cout << "Information for " << rooms.size() << " rooms:" << endl;
-	for (Room& r : rooms) {
-		cout << r;
-	}
+	// for (Room& r : rooms) {
+	// 	cout << r;
+	// }
 }
 
 void pg(people_list_t& people)
 {
-	if (!people.size())
+	if (people.empty())
 		cout << "List of people is empty" << endl;
 	else
 		cout << "Information for " << people.size() << " people:" << endl;
-	for (const Person* p : people) {
-		cout << *p << endl;
-	}
+	// for (const Person* p : people) {
+	// 	cout << *p << endl;
+	// }
 }
 
 // PA and subfunctino definitions
@@ -355,8 +354,8 @@ void pa(people_list_t& people, room_list_t& rooms)
 int num_meetings(room_list_t& rooms)
 {
 	int sum = 0;
-	for (auto itr = rooms.begin(); itr != rooms.end(); ++itr)
-		sum += itr->get_number_Meetings();
+	// for (auto itr = rooms.begin(); itr != rooms.end(); ++itr)
+	// 	sum += itr->get_number_Meetings();
 	return sum;
 }
 
@@ -365,11 +364,11 @@ void ai(people_list_t& people)
 	std::string firstname, lastname, phoneno;
 	cin >> firstname >> lastname >> phoneno;
 	const Person* new_person = new Person(firstname, lastname, phoneno);
-	if (people.find(new_person) != people.end()) {
-		delete new_person;
-		throw runtime_error{"There is already a person with this last name!"};
-	}
-	people.insert(new_person);
+	// if (people.find(new_person) != people.end()) {
+	// 	delete new_person;
+	// 	throw Error("There is already a person with this last name!");
+	// }
+	// people.insert(new_person);
 	cout << "Person " << lastname << " added" << endl;
 }
 
@@ -379,14 +378,14 @@ void ar(room_list_t& rooms)
 	try {
 		// get room will throw an error if there isn't a room in the list
 		// which is exactly what we want, therefore if we don't catch a
-		// runtime_error here we know there is already a room in the list
+		// Error here we know there is already a room in the list
 		get_room(rooms, room_number);
-	} catch(runtime_error e) {
-		rooms.insert(Room(room_number));
+	} catch(Error& e) {
+		// rooms.insert(Room(room_number));
 		cout << "Room " << room_number << " added" << endl;
 		return;
 	}
-	throw runtime_error{"There is already a room with this number!"};
+	throw Error("There is already a room with this number!");
 }
 
 void am(room_list_t& rooms)
@@ -413,11 +412,11 @@ void ap(room_list_t& rooms, people_list_t& people)
 	std::string lastname;
 	cin >> lastname;
 	Person probe(lastname);
-	auto person = people.find(&probe);
-	if (person == people.end())
-		throw runtime_error{"No person with that name!"};
+	// auto person = people.find(&probe);
+	// if (person == people.end())
+	// 	throw Error("No person with that name!");
 
-	meeting.add_participant(*person);
+	// meeting.add_participant(*person);
 	cout << "Participant " << lastname << " added" << endl;
 }
 
@@ -445,7 +444,7 @@ void rm(room_list_t& rooms)
 	// copy
 	try {
 	new_room->add_Meeting(old_meeting);
-	} catch (runtime_error& e) {
+	} catch (Error& e) {
 		// there was already a meeting at that time
 		// add the old meeting back into its old time, then rethrow
 		old_meeting.set_time(old_time);
@@ -463,16 +462,16 @@ void di(room_list_t& rooms, people_list_t& people)
 	cin >> lastname;
 
 	Person probe(lastname);
-	auto person = people.find(&probe);
-	if (person == people.end())
-		throw runtime_error{"No person with that name!"};
+	// auto person = people.find(&probe);
+	// if (person == people.end())
+	// 	throw Error("No person with that name!");
 
 	// now need to determine if this person is in any meetings
-	if (apply_if_arg(rooms.begin(), rooms.end(), is_participant_present_wrapper, *person))
-		throw runtime_error{"This person is a participant in a meeting!"};
+	// if (apply_if_arg(rooms.begin(), rooms.end(), is_participant_present_wrapper, *person))
+	// 	throw Error("This person is a participant in a meeting!");
 
-	delete *person;
-	people.erase(person);
+	// delete *person;
+	// people.erase(person);
 	cout << "Person " << lastname << " deleted" << endl;
 }
 bool is_participant_present_wrapper(Room room, const Person* p)
@@ -510,18 +509,18 @@ void dp(room_list_t& rooms, people_list_t& people)
 	std::string lastname;
 	cin >> lastname;
 	Person probe(lastname);
-	auto person = people.find(&probe);
-	if (person == people.end())
-		throw runtime_error{"No person with that name!"};
+	// auto person = people.find(&probe);
+	// if (person == people.end())
+	// 	throw Error("No person with that name!");
 
-	meeting.remove_participant(*person);
+	// meeting.remove_participant(*person);
 	cout << "Participant " << lastname << " deleted" << endl;
 }
 
 void ds(room_list_t& rooms)
 {
-	for (Room& r : rooms)
-		r.clear_Meetings();
+	// for (Room& r : rooms)
+	// 	r.clear_Meetings();
 	cout << "All meetings deleted" << endl;
 }
 
@@ -533,14 +532,14 @@ void dg(room_list_t& rooms, people_list_t& people)
 
 void dg_no_messages(room_list_t& rooms, people_list_t& people)
 {
-	for (Room& r : rooms) {
-		if (r.has_Meetings())
-			throw runtime_error{"Cannot clear people list unless there are no meetings!"};
-	}
-	for (auto itr = people.begin(); itr != people.end(); ) {
-		delete *itr;
-		people.erase(itr++);
-	}
+	// for (Room& r : rooms) {
+	// 	if (r.has_Meetings())
+	// 		throw Error("Cannot clear people list unless there are no meetings!");
+	// }
+	// for (auto itr = people.begin(); itr != people.end(); ) {
+	// 	delete *itr;
+	// 	people.erase(itr++);
+	// }
 }
 
 void da(room_list_t& rooms, people_list_t& people)
@@ -565,21 +564,21 @@ void sd(room_list_t& rooms, people_list_t& people)
 
 	ofstream output_file(filename.c_str());
 	if (!output_file.is_open())
-		throw runtime_error{"Could not open file!"};
+		throw Error("Could not open file!");
 
 	// file format:
 	// the number of people
 	output_file << people.size() << endl;
 	// print each person per line
-	for (const Person* p : people) {
-		output_file << *p << endl;
-	}
+	// for (const Person* p : people) {
+	// 	output_file << *p << endl;
+	// }
 	// number of rooms
 	output_file << rooms.size() << endl;
 	// each room
-	for (Room& r : rooms) {
-		r.save(output_file);
-	}
+	// for (Room& r : rooms) {
+	// 	r.save(output_file);
+	// }
 	output_file.close();
 
 	cout << "Data saved" << endl;
@@ -592,7 +591,7 @@ void ld(room_list_t& rooms, people_list_t& people)
 
 	ifstream input_file(filename.c_str());
 	if (!input_file.is_open())
-		throw runtime_error{"Could not open file!"};
+		throw Error("Could not open file!");
 
 	// clear all data
 	room_list_t rooms_backup(rooms);
@@ -607,15 +606,15 @@ void ld(room_list_t& rooms, people_list_t& people)
 	int max;
 	input_file >> max;
 	if (!input_file)
-		throw runtime_error{"Invalid data found in file!"};
+		throw Error("Invalid data found in file!");
 
 	for (int i = 0; i < max; ++i) {
 		// read in each person
 		const Person* new_person;
 		try {
 			new_person = new Person(input_file);
-			people.insert(new_person);
-		} catch (runtime_error& e) {
+			// people.insert(new_person);
+		} catch (Error& e) {
 			delete new_person;
 			throw;
 		}
@@ -623,16 +622,16 @@ void ld(room_list_t& rooms, people_list_t& people)
 	// read in number of rooms
 	input_file >> max;
 	if (!input_file)
-		throw runtime_error{"Invalid data found in file!"};
+		throw Error("Invalid data found in file!");
 
 	for (int i = 0; i < max; ++i) {
 		// read in each room
-		rooms.insert(Room(input_file, people));
+		// rooms.insert(Room(input_file, people));
 	}
 	// done!
 	}
-	catch(runtime_error& e) {
-		cout << e.what() << endl;
+	catch(Error& e) {
+		cout << *e.msg << endl;
 		people = people_backup;
 		rooms = rooms_backup;
 		input_file.close();

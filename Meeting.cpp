@@ -25,7 +25,7 @@ void save_person(const Person*, std::ostream&);
 // No check made for whether the Meeting already exists or not.
 // Person list is needed to resolve references to meeting participants
 // Input for a member variable value is read directly into the member variable.
-Meeting::Meeting(std::ifstream& is, const Ordered_list<const Person*, Less_than_ptr<const Person*> >& people)
+Meeting::Meeting(std::ifstream& is, const people_list_t& people)
 {
 	int num_participants;
 	is >> time;
@@ -38,11 +38,11 @@ Meeting::Meeting(std::ifstream& is, const Ordered_list<const Person*, Less_than_
 		is >> lastname;
 		// construct probe and try to find existing person
 		Person probe(lastname);
-		itr = people.find(&probe);
-		if (itr == people.end())
-			throw runtime_error{"Invalid data found in file!"};
-		// participant found, so insert!
-		participants.insert(*itr);
+		// itr = people.find(&probe);
+		// if (itr == people.end())
+		// 	throw runtime_error{"Invalid data found in file!"};
+		// // participant found, so insert!
+		// participants.insert(*itr);
 	}
 
 	if(is.bad())
@@ -56,33 +56,33 @@ Meeting::Meeting(std::ifstream& is, const Ordered_list<const Person*, Less_than_
 void Meeting::add_participant(const Person* p)
 {
 	// need to probe the participants list
-	if (participants.find(p) != participants.end())
-		throw runtime_error{"This person is already a participant!"};
+	// if (participants.find(p) != participants.end())
+	// 	throw runtime_error{"This person is already a participant!"};
 
-	participants.insert(p);
+	// participants.insert(p);
 }
 // Return true if the person is a participant, false if not.
 bool Meeting::is_participant_present(const Person* p) const
 {
-	if (participants.find(p) == participants.end())
-		return false;
+	// if (participants.find(p) == participants.end())
+	// 	return false;
 	return true;
 }
 // Remove from the list, throw exception if participant was not found.
 void Meeting::remove_participant(const Person* p)
 {
-	auto itr = participants.find(p);
-	if (itr == participants.end())
-		throw runtime_error{"This person is not a participant in the meeting!"};
+	// auto itr = participants.find(p);
+	// if (itr == participants.end())
+	// 	throw runtime_error{"This person is not a participant in the meeting!"};
 
-	participants.erase(itr);
+	// participants.erase(itr);
 }
 		
 // Write a Meeting's data to a stream in save format with final endl.
 void Meeting::save(std::ostream& os) const
 {
 	os << time << " " << topic << " " << participants.size() << endl;
-	apply_arg_ref(participants.begin(), participants.end(), save_person, os);
+	// apply_arg_ref(participants.begin(), participants.end(), save_person, os);
 }
 
 void save_person(const Person* person, std::ostream& os)
@@ -103,13 +103,13 @@ bool Meeting::operator< (const Meeting& other) const
 std::ostream& operator<< (std::ostream& os, const Meeting& meeting)
 {
 	os <<  "Meeting time: " << meeting.time << ", Topic: " << meeting.topic << "\nParticipants:";
-	if (meeting.participants.empty()) {
-		assert(meeting.participants.begin() == meeting.participants.end());
-		os << " None" << endl;
-	} else {
-		assert(meeting.participants.begin() != meeting.participants.end());
-		os << endl;
-		apply_arg_ref(meeting.participants.begin(), meeting.participants.end(), p_person, os);
-	}
+	// if (meeting.participants.empty()) {
+	// 	assert(meeting.participants.begin() == meeting.participants.end());
+	// 	os << " None" << endl;
+	// } else {
+	// 	assert(meeting.participants.begin() != meeting.participants.end());
+	// 	os << endl;
+	// 	apply_arg_ref(meeting.participants.begin(), meeting.participants.end(), p_person, os);
+	// }
 	return os;
 }

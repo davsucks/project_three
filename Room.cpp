@@ -29,7 +29,7 @@ void save_meeting(const Meeting, ostream&);
 // No check made for whether the Room already exists or not.
 // Throw Error exception if invalid data discovered in file.
 // Input for a member variable value is read directly into the member variable.
- Room::Room(std::ifstream& is, const Ordered_list<const Person*, Less_than_ptr<const Person*> >& people_list)
+ Room::Room(std::ifstream& is, const people_list_t& people_list)
  {
  	is >> room_number;
 
@@ -37,7 +37,7 @@ void save_meeting(const Meeting, ostream&);
  	is >> num_meetings;
 
  	for (int i = 0; i < num_meetings && is.good(); ++i) {
- 		meetings.insert(Meeting(is, people_list));
+ 		// meetings.insert(Meeting(is, people_list));
  	}
 
  	if (is.bad())
@@ -53,45 +53,46 @@ void Room::add_Meeting(const Meeting& m)
 {
 	if (is_Meeting_present(m.get_time()))
 		throw runtime_error{"There is already a meeting at that time!"};
-	meetings.insert(m);
+	// meetings.insert(m);
 }
 // Return true if there is a Meeting at the time, false if not.
 bool Room::is_Meeting_present(int time) const
 {
 	Meeting probe(time);
-	if (meetings.find(probe) == meetings.end())
-		return false;
+	// if (meetings.find(probe) == meetings.end())
+	// 	return false;
 	return true;
 }
 // Return a reference if the Meeting is present, throw exception if not.
 Meeting& Room::get_Meeting(int time) const
 {
 	Meeting probe(time);
-	auto itr = meetings.find(probe);
-	if (itr == meetings.end())
-		throw runtime_error{"No meeting at that time!"};
-	return *itr;
+	// auto itr = meetings.find(probe);
+	// if (itr == meetings.end())
+	// 	throw runtime_error{"No meeting at that time!"};
+	// return *itr;
 }
 // Remove the specified Meeting, throw exception if a Meeting at that time was not found.
 void Room::remove_Meeting(int time)
 {
 	Meeting probe(time);
-	auto itr = meetings.find(probe);
-	if (itr == meetings.end())
-		throw runtime_error{"No meeting at that time!"};
-	meetings.erase(itr);
+	// auto itr = meetings.find(probe);
+	// if (itr == meetings.end())
+	// 	throw runtime_error{"No meeting at that time!"};
+	// meetings.erase(itr);
 }
 // Return true if the person is present in any of the meetings
 bool Room::is_participant_present(const Person* person_ptr) const
 {
-	return apply_if_arg(meetings.begin(), meetings.end(), is_participant_in_meeting, person_ptr);
+	// return apply_if_arg(meetings.begin(), meetings.end(), is_participant_in_meeting, person_ptr);
+	return true;
 }
 
 // Write a Rooms's data to a stream in save format, with endl as specified.
 void Room::save(std::ostream& os) const
 {
 	os << room_number << " " << meetings.size() << endl;
-	apply_arg_ref(meetings.begin(), meetings.end(), save_meeting, os);
+	// apply_arg_ref(meetings.begin(), meetings.end(), save_meeting, os);
 }
 
 void save_meeting(const Meeting meeting, ostream& os)
@@ -106,10 +107,10 @@ void save_meeting(const Meeting meeting, ostream& os)
 std::ostream& operator<< (std::ostream& os, const Room& room)
 {
 	os << "--- Room " << room.get_room_number() << " ---" << endl;
-	if (room.get_number_Meetings())
-		apply_arg_ref(room.meetings.begin(), room.meetings.end(), print_meeting, os);
-	else
-		os << "No meetings are scheduled" << endl;
+	// if (room.get_number_Meetings())
+	// 	apply_arg_ref(room.meetings.begin(), room.meetings.end(), print_meeting, os);
+	// else
+	// 	os << "No meetings are scheduled" << endl;
 	return os;
 }
 

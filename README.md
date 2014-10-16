@@ -3,10 +3,10 @@ project_three
 
 To do
 -----
-1. Concatenate the two characters of thecommand into a single string, use this to index command map
-2. Replace command dispatching to use map of function pointers (make sure to test for qq explicitly)
-3. declare a simple struct that just holds the room and people list, and pass this (by reference) to every command function
-4. 
+1. Replace custom containers with stl containers.
+2. Concatenate the two characters of thecommand into a single string, use this to index command map
+3. Replace command dispatching to use map of function pointers (make sure to test for qq explicitly)
+4. declare a simple struct that just holds the room and people list, and pass this (by reference) to every command function 
 
 Restrictions
 ------------
