@@ -34,3 +34,12 @@ Algorithm Requirements
 	- **Exactly once** you have to use a `range-for`
 		- **IMPORTANT:** put a comment before it that says "the one range for" so kieras can find it easily.
 		- The body of the `range for` should be plain code
+
+Specific Requirements for Algorithms and Containers
+---------------------------------------------------
+- Minus the `list` container, anytime a container is *searched* for a supplied Person, Meeting, or Room the search must be done in logarithmic time. ***Note:*** do not use a `binary_search` or `lower_bound` algorithm on the `list` container.
+- You must use the `copy` algorithm with an output stream *at least once*. Remember you can define additional `operator<<` overloads to make this easy.
+- You must use `std::bind` with bound values with an algorithm *at least once*
+- You must use a custom functor that has member variables with getter/reader functions in combination with an algorithm and a container *at least once* in the project. *Hint*: Consider part of the **pa** command.
+- You must use a lambda with a capture variable with an algorithm *at least once*.
+- In all other places in your code where you use a Standard Library algorithm, you must *not* use your own helper function or custom function object class if `bind`, `mem_fn`, a lambda, an inserter a stream iterator or some other Standard Library facility will work just as well.
