@@ -43,6 +43,9 @@ public:
 	bool operator< (const Person& rhs) const
 		{return lastname < rhs.lastname;}
 
+	bool operator== (const Person& rhs) const
+		{return (!(this < &rhs) && !(&rhs < this));}
+
 	friend std::ostream& operator<< (std::ostream& os, const Person& person);
 
 private:

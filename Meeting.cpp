@@ -1,7 +1,9 @@
 #include "Meeting.h"
 #include "Utility.h"
-#include <stdexcept>
+#include <algorithm>
+#include <functional>
 using namespace std;
+using namespace std::placeholders;
 
 /* Meeting class - this class represents a Meeting in terms of a time, topic, and 
 list of participants. 
@@ -16,6 +18,11 @@ in order by time, and an output operator to simplify printing the Meeting inform
 We let the compiler supply the destructor and the copy/move constructors and assignment operators.
 
 */
+
+bool Meeting::comp_participants::operator() (const Person* lhs, const Person* rhs) const
+{
+	return lhs->get_lastname() < rhs->get_lastname();
+}
 
 // HELPER FUNCTION
 void save_person(const Person*, std::ostream&);
@@ -33,20 +40,26 @@ Meeting::Meeting(std::ifstream& is, const people_list_t& people)
 	is >> num_participants;
 	// read in all participants
 	std::string lastname;
-	auto itr = people.begin();
+	auto participant_itr = participants.begin();
+	auto person_itr = people.begin();
+
 	for(int i = 0; i < num_participants && is.good(); ++i) {
 		is >> lastname;
-		// construct probe and try to find existing person
+		// try to find existing person
 		Person probe(lastname);
-		// itr = people.find(&probe);
-		// if (itr == people.end())
-		// 	throw runtime_error{"Invalid data found in file!"};
-		// // participant found, so insert!
-		// participants.insert(*itr);
+		person_itr = lower_bound(people.begin(), people.end(), &probe, comp_participants());
+		if (person_itr == people.end()) {
+			// couldn't find person in the people list
+			throw Error("Invalid data found in file!");
+		}
+
+		// person exists so insert!
+		participant_itr = lower_bound(participants.begin(), participants.end(), &probe, comp_participants());
+		participants.insert(participant_itr, *person_itr);
 	}
 
 	if(is.bad())
-		throw runtime_error{"Invalid data found in file!"};
+		throw Error("Invalid data found in file!");
 }
 
 // Meeting objects manage their own participant list. Participants
@@ -56,33 +69,34 @@ Meeting::Meeting(std::ifstream& is, const people_list_t& people)
 void Meeting::add_participant(const Person* p)
 {
 	// need to probe the participants list
-	// if (participants.find(p) != participants.end())
-	// 	throw runtime_error{"This person is already a participant!"};
+	if (is_participant_present(p))
+		throw Error("This person is already a participant!");
 
-	// participants.insert(p);
+	auto insert_pos = lower_bound(participants.begin(), participants.end(), p, comp_participants());
+	participants.insert(insert_pos, p);
 }
 // Return true if the person is a participant, false if not.
 bool Meeting::is_participant_present(const Person* p) const
 {
-	// if (participants.find(p) == participants.end())
-	// 	return false;
-	return true;
+	return binary_search(participants.begin(), participants.end(), p, comp_participants());
 }
 // Remove from the list, throw exception if participant was not found.
 void Meeting::remove_participant(const Person* p)
 {
-	// auto itr = participants.find(p);
-	// if (itr == participants.end())
-	// 	throw runtime_error{"This person is not a participant in the meeting!"};
+	if (!is_participant_present(p))
+		throw Error("This person is not a participant in the meeting!" );
 
-	// participants.erase(itr);
+	auto remove_pos = lower_bound(participants.begin(), participants.end(), p, comp_participants());
+	participants.erase(remove_pos);
 }
 		
 // Write a Meeting's data to a stream in save format with final endl.
 void Meeting::save(std::ostream& os) const
 {
 	os << time << " " << topic << " " << participants.size() << endl;
-	// apply_arg_ref(participants.begin(), participants.end(), save_person, os);
+	// bind save_person
+	auto bound_save = bind(save_person, _1, ref(os));
+	for_each(participants.begin(), participants.end(), bound_save);
 }
 
 void save_person(const Person* person, std::ostream& os)
@@ -103,13 +117,12 @@ bool Meeting::operator< (const Meeting& other) const
 std::ostream& operator<< (std::ostream& os, const Meeting& meeting)
 {
 	os <<  "Meeting time: " << meeting.time << ", Topic: " << meeting.topic << "\nParticipants:";
-	// if (meeting.participants.empty()) {
-	// 	assert(meeting.participants.begin() == meeting.participants.end());
-	// 	os << " None" << endl;
-	// } else {
-	// 	assert(meeting.participants.begin() != meeting.participants.end());
-	// 	os << endl;
-	// 	apply_arg_ref(meeting.participants.begin(), meeting.participants.end(), p_person, os);
-	// }
+	if (meeting.participants.empty()) {
+		os << " None" << endl;
+	} else {
+		os << endl;
+		for_each(meeting.participants.begin(), meeting.participants.end(), [&os](const Person* p) { os << *p << endl; });
+
+	}
 	return os;
 }

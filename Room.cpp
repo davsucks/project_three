@@ -1,6 +1,9 @@
 #include "Room.h"
-#include <stdexcept>
+#include "Utility.h"
+#include <algorithm>
+#include <map>
 using namespace std;
+using namespace std::placeholders;
 
 /* A Room object contains a room number and a list containing Meeting objects stored with
 meeting times as the key.  When created, a Room has no Meetings. When destroyed, the Meeting
@@ -19,9 +22,13 @@ to be able to access the Meeting container in order to search for a specific par
 We let the compiler supply the destructor and copy/move constructors and assignment operators.
 */ 
 
-bool is_participant_in_meeting(const Meeting&, const Person*);
-void print_meeting(const Meeting, ostream&);
-void save_meeting(const Meeting, ostream&);
+// struct used to compare meeting times
+bool Room::comp_Meetings::operator() (const int& rhs, const int& lhs) const
+{
+	return normalize_time(rhs) < normalize_time(lhs);
+}
+
+void save_meeting(pair<int, Meeting>, ostream&);
 
 // Construct a Room from an input file stream in save format, using the people list,
 // restoring all the Meeting information. 
@@ -29,6 +36,7 @@ void save_meeting(const Meeting, ostream&);
 // No check made for whether the Room already exists or not.
 // Throw Error exception if invalid data discovered in file.
 // Input for a member variable value is read directly into the member variable.
+
  Room::Room(std::ifstream& is, const people_list_t& people_list)
  {
  	is >> room_number;
@@ -37,11 +45,13 @@ void save_meeting(const Meeting, ostream&);
  	is >> num_meetings;
 
  	for (int i = 0; i < num_meetings && is.good(); ++i) {
- 		// meetings.insert(Meeting(is, people_list));
+ 		Meeting new_meeting(is, people_list);
+ 		pair<int, Meeting> new_pair(new_meeting.get_time(), new_meeting);
+ 		meetings.insert(new_pair);
  	}
 
  	if (is.bad())
- 		throw runtime_error{"Invalid data found in file!"};
+ 		throw Error("Invalid data found in file!");
  }
 				
 // Room objects manage their own Meeting container. Meetings are objects in
@@ -52,52 +62,49 @@ void save_meeting(const Meeting, ostream&);
 void Room::add_Meeting(const Meeting& m)
 {
 	if (is_Meeting_present(m.get_time()))
-		throw runtime_error{"There is already a meeting at that time!"};
-	// meetings.insert(m);
+		throw Error("There is already a meeting at that time!");
+	meetings.insert( pair<int, Meeting>(m.get_time(), m) );
 }
 // Return true if there is a Meeting at the time, false if not.
 bool Room::is_Meeting_present(int time) const
 {
-	Meeting probe(time);
-	// if (meetings.find(probe) == meetings.end())
-	// 	return false;
+	auto meeting = meetings.find(time);
+	if (meeting == meetings.end())
+		return false;
 	return true;
 }
 // Return a reference if the Meeting is present, throw exception if not.
-Meeting& Room::get_Meeting(int time) const
+Meeting Room::get_Meeting(int time) const
 {
-	Meeting probe(time);
-	// auto itr = meetings.find(probe);
-	// if (itr == meetings.end())
-	// 	throw runtime_error{"No meeting at that time!"};
-	// return *itr;
+	if (!is_Meeting_present(time))
+		throw Error("No meeting at that time!");
+	auto pair = meetings.find(time);
+	return pair->second;
 }
 // Remove the specified Meeting, throw exception if a Meeting at that time was not found.
 void Room::remove_Meeting(int time)
 {
-	Meeting probe(time);
-	// auto itr = meetings.find(probe);
-	// if (itr == meetings.end())
-	// 	throw runtime_error{"No meeting at that time!"};
-	// meetings.erase(itr);
+	if (!is_Meeting_present(time))
+		throw Error("No meeting at that time!");
+	meetings.erase(time);
 }
 // Return true if the person is present in any of the meetings
 bool Room::is_participant_present(const Person* person_ptr) const
 {
-	// return apply_if_arg(meetings.begin(), meetings.end(), is_participant_in_meeting, person_ptr);
-	return true;
+	return any_of(meetings.begin(), meetings.end(), [person_ptr](pair<int, Meeting> meeting_pair) { return meeting_pair.second.is_participant_present(person_ptr); });
 }
 
 // Write a Rooms's data to a stream in save format, with endl as specified.
 void Room::save(std::ostream& os) const
 {
 	os << room_number << " " << meetings.size() << endl;
-	// apply_arg_ref(meetings.begin(), meetings.end(), save_meeting, os);
+	auto bound_save = bind(save_meeting, _1, ref(os));
+	for_each(meetings.begin(), meetings.end(), bound_save);
 }
 
-void save_meeting(const Meeting meeting, ostream& os)
+void save_meeting(pair<int, Meeting> meeting, ostream& os)
 {
-	meeting.save(os);
+	meeting.second.save(os);
 }
 	
 // Print the Room data as follows:
@@ -107,19 +114,9 @@ void save_meeting(const Meeting meeting, ostream& os)
 std::ostream& operator<< (std::ostream& os, const Room& room)
 {
 	os << "--- Room " << room.get_room_number() << " ---" << endl;
-	// if (room.get_number_Meetings())
-	// 	apply_arg_ref(room.meetings.begin(), room.meetings.end(), print_meeting, os);
-	// else
-	// 	os << "No meetings are scheduled" << endl;
+	if (room.has_Meetings())
+		for_each(room.meetings.begin(), room.meetings.end(), [&os](pair<int, Meeting> meeting_pair) { os << meeting_pair.second; });
+	else
+		os << "No meetings are scheduled" << endl;
 	return os;
-}
-
-bool is_participant_in_meeting(const Meeting& meeting, const Person* person_ptr)
-{
-	return meeting.is_participant_present(person_ptr);
-}
-
-void print_meeting(const Meeting meeting, ostream& os)
-{
-	os << meeting;
 }

@@ -22,5 +22,120 @@ Project 2.
  "Person is already committed at that time!" 
  "A participant is already committed at the new time!"
 
+// STRING FROM PROJECT_TWO RIGHT HERE
+/* Notes:
+1. The messages are classified by which module's .cpp file prints them out.
+You must follow this classification to be sure your modules behave like mine.
+Note that p2_main does all printing except for when data about individual Persons, 
+Meetings, or Rooms needs to be done by their output functions.
+
+2. Two or more strings on the same line would be part of the same
+line of output, with some variable value output between them.
+
+3. If there is no actual constant non-whitespace text involved in an output statement, it
+is not shown here. For example, the output statement for printing a Person's data just
+outputs the data with one space between each item.
+
+4. All error messages are actually printed out by p2_main. The unrecognized command error 
+message can be printed out directly by p2_main if desired. But all other error messages are
+used to initialize an Error exception object in the responsible module named below, and are
+then printed out by the top-level catch block in p2_main.
+*/
+
+/************ Information messages ***************
+/* listed by which module outputs the message */
+/* main module */
+/* top level messages */
+"\nEnter command: "
+"Done"
+
+// print command messages
+ "List of people is empty"
+ "Information for "  " people:"
+ "List of rooms is empty"
+ "Information for "  " rooms:"
+
+ "Memory allocations:"  
+ "Persons: "  
+ "Meetings: "  
+ "Rooms: "  
+ "Lists: "  
+ "List Nodes: "  
+ "Strings: "  " with "  " bytes total"  
+
+// add/delete/load/save command messages
+ "Person " " added"
+ "Room " " added"
+ "Meeting added at "
+ "Participant " " added"
+ "Meeting rescheduled to room "  " at "  
+ "Person " " deleted"
+ "Room " " deleted"
+ "Meeting at " " deleted"
+ "Participant " " deleted"
+ "All meetings deleted"
+ "All rooms and meetings deleted"
+ "All persons deleted" 
+ "Data saved"
+ "Data loaded"
+ 
+ /* *** Room.cpp *** */
+// printing messages
+ "--- Room "  " ---"
+ "No meetings are scheduled"  
+
+/* *** Meeting.cpp *** */
+// printing messages
+ "Meeting time: "    ", Topic: "   "\nParticipants:"  
+ " None"
+ 
+/* *** String.cpp *** */
+// messages printed by String.cpp - some variable is between two << in a row
+cout << "Ctor: \"" <<  << "\"" << endl;
+cout << "Copy ctor: \"" <<  << "\"" << endl; 
+cout << "Move ctor: \"" <<  << "\"" << endl;
+cout << "Dtor: \"" <<  << "\"" << endl;
+cout << "Assign from C-string:  \"" <<  << "\"" << endl;
+cout << "Copy assign from String:  \"" <<   << "\"" << endl;
+cout << "Move assign from String:  \"" <<   << "\"" << endl;
+
+/******** Error messages *********/
+/* Error messages are always printed by the main module catch,
+but the messages are listed by which module uses them to throw an exception.
+*/
+
+/* Thrown by String.cpp in a String_exception object */
+// Message used to initialize an String_exception object
+"Subscript out of range!"
+
+/* main module message that can be printed directly or used with an exception Error object*/
+ "Unrecognized command!"
+/* main module messages used to initialize an exception Error object */
+ "There is already a person with this last name!"
+ "There is already a room with this number!"
+ "This person is a participant in a meeting!"
+ "Cannot clear people list unless there are no meetings!"
+ "No person with that name!"
+ "No room with that number!"
+ "Room number is not in range!"
+ "Time is not in range!"  
+ "Could not read an integer value!"  
+ "Could not open file!"
+ 
+
+/* *** Room.cpp *** */
+// messages used to initialize an exception Error object
+ "No meeting at that time!"
+ "There is already a meeting at that time!"
+
+/* *** Meeting.cpp *** */
+// messages used to initialize an exception Error object
+ "This person is already a participant!"  
+ "This person is not a participant in the meeting!" 
+ 
+ /* Multiple-module message */
+// This message used to initialize an exception Error object by p2_main, 
+// Person, Meeting, and Room, and printed out only from p2_main
+ "Invalid data found in file!"
 
 

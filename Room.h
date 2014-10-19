@@ -58,7 +58,7 @@ public:
 	// Return true if there is a Meeting at the time, false if not.
 	bool is_Meeting_present(int time) const;
 	// Return a reference if the Meeting is present, throw exception if not.
-	Meeting& get_Meeting(int time) const;
+	Meeting get_Meeting(int time) const;
 	// Remove the specified Meeting, throw exception if a Meeting at that time was not found.
 	void remove_Meeting(int time);
 	// Remove and destroy all meetings
@@ -72,12 +72,18 @@ public:
 
 	// This operator defines the order relation between Rooms, based just on the number
 	bool operator< (const Room& rhs) const
-		{return room_number < rhs.room_number;}		
+		{return room_number < rhs.room_number;}	
+
+	bool operator== (const Room& rhs) const
+		{ return room_number == rhs.room_number;}	
 
 	friend std::ostream& operator<< (std::ostream& os, const Room& room);
 
 private:
-	using Meetings_t = std::map<int, Meeting>;
+	struct comp_Meetings {
+		bool operator() (const int&, const int&) const;
+	};
+	using Meetings_t = std::map<int, Meeting, comp_Meetings>;
 	// your choice of other private member variables and functions
 	int room_number;
 	Meetings_t meetings;

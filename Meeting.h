@@ -14,11 +14,12 @@ We let the compiler supply the destructor and the copy/move constructors and ass
 #ifndef MEETING_H
 #define MEETING_H
 
+#include "Person.h"
+#include "Utility.h"
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "Person.h"
-#include "Utility.h"
+#include <set>
 
 class Meeting {
 public:
@@ -62,8 +63,11 @@ public:
 	friend std::ostream& operator<< (std::ostream& os, const Meeting& meeting);
 		
 private:
-
-	using Participants_t = people_list_t;
+	struct comp_participants {
+		bool operator() (const Person*, const Person*) const;
+	};
+	using Participants_t = std::set<const Person*, comp_participants>;
+	using Participants_itr_t = Participants_t::iterator;
 	Participants_t participants;
 	
 	int time;

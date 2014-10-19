@@ -1,5 +1,5 @@
 #include "Person.h"
-#include <stdexcept>
+#include "Utility.h"
 using namespace std;
 
 // Construct a Person object from a file stream in save format.
@@ -12,7 +12,7 @@ Person::Person(ifstream& is)
 	is >> lastname;
 	is >> phoneno;
 	if (is.bad())
-		throw runtime_error{"Invalid data found in file!"};
+		throw Error("Invalid data found in file!");
 }
 
 // Write a Person's data to a stream in save format with final endl.
