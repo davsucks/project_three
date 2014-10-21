@@ -1,5 +1,4 @@
 #include "Meeting.h"
-#include "Utility.h"
 #include <algorithm>
 #include <functional>
 using namespace std;

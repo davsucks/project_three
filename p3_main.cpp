@@ -90,33 +90,32 @@ int main()
 	command_map_t command_map;
 
 	// populate the command map
-	{
-		command_map["pi"] = &pi;
-		command_map["pr"] = &pr;
-		command_map["pm"] = &pm;
-		command_map["ps"] = &ps;
-		command_map["pg"] = &pg;
-		command_map["pa"] = &pa;
-		command_map["ai"] = &ai;
-		command_map["ar"] = &ar;
-		command_map["am"] = &am;
-		command_map["ap"] = &ap;
-		command_map["rm"] = &rm;
-		command_map["di"] = &di;
-		command_map["dr"] = &dr;
-		command_map["dm"] = &dm;
-		command_map["dp"] = &dp;
-		command_map["ds"] = &ds;
-		command_map["dg"] = &dg;
-		command_map["da"] = &da;
-		command_map["sd"] = &sd;
-		command_map["ld"] = &ld;
-	}
+	command_map["pi"] = &pi;
+	command_map["pr"] = &pr;
+	command_map["pm"] = &pm;
+	command_map["ps"] = &ps;
+	command_map["pg"] = &pg;
+	command_map["pa"] = &pa;
+	command_map["ai"] = &ai;
+	command_map["ar"] = &ar;
+	command_map["am"] = &am;
+	command_map["ap"] = &ap;
+	command_map["rm"] = &rm;
+	command_map["di"] = &di;
+	command_map["dr"] = &dr;
+	command_map["dm"] = &dm;
+	command_map["dp"] = &dp;
+	command_map["ds"] = &ds;
+	command_map["dg"] = &dg;
+	command_map["da"] = &da;
+	command_map["sd"] = &sd;
+	command_map["ld"] = &ld;
 
 	while (true) {
 		try {
 		/* main program loop */
 		cout << "\nEnter command: ";
+		cin.width(2);
 		cin >> command;
 		if (command == "qq") {
 			// quit
@@ -555,8 +554,10 @@ void set_container_and_close_file(container_t& container, ofstream& file, people
 
 void set_backups(container_t& container, people_list_t& people_backup, room_list_t& rooms_backup)
 {
-	container.people = people_backup;
-	container.rooms = rooms_backup;
+	container.people.swap(people_backup);
+	container.rooms.swap(rooms_backup);
+	people_backup.clear();
+	rooms_backup.clear();
 }
 
 void ld(container_t& container)
@@ -565,7 +566,7 @@ void ld(container_t& container)
 	string filename;
 	cin >> filename;
 
-	ifstream input_file(filename.c_str());
+	ifstream input_file(filename);
 	if (!input_file.is_open())
 		throw Error("Could not open file!");
 
@@ -581,10 +582,8 @@ void ld(container_t& container)
 	// the number of people
 	int max;
 	input_file >> max;
-	if (!input_file) {
-		cerr<< "FILL ME IN IM ON LINE " << __LINE__ << " IN LD, ASSHOLE" << endl;
+	if (!input_file)
 		throw Error("Invalid data found in file!");
-	}
 
 	for (int i = 0; i < max; ++i) {
 		// read in each person
@@ -594,20 +593,15 @@ void ld(container_t& container)
 			auto position = get_position_for_new_Person(container.people, new_person->get_lastname());
 			container.people.insert(position, new_person);
 		} catch (Error& e) {
-			// need to delete all people
-			da_no_messages(container.rooms, container.people);
+			// need to delete the new person
 			delete new_person;
-			set_container_and_close_file(container, input_file, people_backup, rooms_backup);
 			throw Error("Invalid data found in file!");
 		}
 	}
 	// read in number of rooms
 	input_file >> max;
-	if (!input_file) {
-		da_no_messages(container.rooms, container.people);
-		set_container_and_close_file(container, input_file, people_backup, rooms_backup);
+	if (!input_file)
 		throw Error("Invalid data found in file!");
-	}
 
 	for (int i = 0; i < max; ++i) {
 		// read in each room
