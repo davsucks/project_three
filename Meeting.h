@@ -64,7 +64,6 @@ private:
 		bool operator() (const Person*, const Person*) const;
 	};
 	using Participants_t = std::set<const Person*, comp_participants>;
-	using Participants_itr_t = Participants_t::iterator;
 	Participants_t participants;
 	
 	int time;
