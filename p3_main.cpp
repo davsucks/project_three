@@ -1,91 +1,94 @@
 #include "Person.h"
 #include "Meeting.h"
 #include "Room.h"
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
-#include <string>
-#include <list>
-#include <vector>
-#include <map>
 #include <algorithm>
 using namespace std;
 
 // struct used to pass into every command function
-struct container_t {
+struct Container_t {
 	people_list_t people;
 	room_list_t rooms;
 };
 
+class pa_helper {
+public:
+
+private:
+
+};
+
 // types for the command map
-using CommandFunction = void (*)(container_t&);
+using CommandFunction = void (*)(Container_t&);
 using command_map_t = map<string, CommandFunction>;
 
 // MAIN HELPER FUNCTIONS
 
+// General Helpers
 void skip_line();
+int read_int();
 int read_room_number();
 int read_time();
+
+people_list_t::iterator get_Person_itr(people_list_t&, std::string);
 const Person* get_Person_ptr(people_list_t&, string);
-people_itr_t get_position_for_new_Person(people_list_t&, string);
+people_list_t::iterator get_position_for_new_Person(people_list_t&, string);
 
-void pi(container_t&);
+void pi(Container_t&);
 
-void pr(container_t&);
+void pr(Container_t&);
 void check_room_no_in_range(int);
 Room& read_no_and_get_room(room_list_t&);
 room_list_t::iterator get_room_itr(room_list_t&, int);
-room_list_t::iterator get_position_for_new_Room(room_list_t&, Room&);
 Room& get_room(room_list_t&, int);
 
-void pm(container_t&);
-void check_time_in_range(int);
+void pm(Container_t&);
 
-void ps(container_t&);
+void ps(Container_t&);
 
-void pg(container_t&);
+void pg(Container_t&);
 
-void pa(container_t&);
+void pa(Container_t&);
 int num_meetings(room_list_t&);
 
-void ai(container_t&);
+void ai(Container_t&);
 
-void ar(container_t&);
+void ar(Container_t&);
 
-void am(container_t&);
+void am(Container_t&);
 
-void ap(container_t&);
+void ap(Container_t&);
 
-void rm(container_t&);
+void rm(Container_t&);
 
-void di(container_t&);
-bool is_participant_present_wrapper(Room room, const Person* p);
+void di(Container_t&);
 
-void dr(container_t&);
+void dr(Container_t&);
 
-void dm(container_t&);
+void dm(Container_t&);
 
-void dp(container_t&);
+void dp(Container_t&);
 
-void ds(container_t&);
+void ds(Container_t&);
 
-void dg(container_t&);
+void dg(Container_t&);
 void dg_no_messages(room_list_t&, people_list_t&);
 
-void da(container_t&);
+void da(Container_t&);
 void da_no_messages(room_list_t&, people_list_t&);
 
-void sd(container_t&);
+void sd(Container_t&);
 
-void set_container_and_close_file(container_t& container, ofstream&, people_list_t&, room_list_t&);
-void set_container_and_close_file(container_t& container, ifstream&, people_list_t&, room_list_t&);
-void set_backups(container_t&, people_list_t&, room_list_t&);
-void ld(container_t&);
+void set_container_and_close_file(Container_t& container, ofstream&, people_list_t&, room_list_t&);
+void set_container_and_close_file(Container_t& container, ifstream&, people_list_t&, room_list_t&);
+void set_backups(Container_t&, people_list_t&, room_list_t&);
+void ld(Container_t&);
 
 int main() 
 {
 
-	container_t container;
+	Container_t container;
+	char action;
+	char item;
 	string command;
 	command_map_t command_map;
 
@@ -115,8 +118,11 @@ int main()
 		try {
 		/* main program loop */
 		cout << "\nEnter command: ";
-		cin.width(2);
-		cin >> command;
+		cin >> action;
+		cin >> item;
+		command.clear();
+		command += action;
+		command += item;
 		if (command == "qq") {
 			// quit
 			da(container);
@@ -155,14 +161,7 @@ void skip_line()
 
 int read_room_number()
 {
-	// removing for now
-	// assert(cin);
-	int room_number;
-	cin >> room_number;
-	if (!cin) {
-		cin.clear();
-		throw Error("Could not read an integer value!");
-	}
+	int room_number = read_int();
 	check_room_no_in_range(room_number);
 	return room_number;
 }
@@ -171,14 +170,28 @@ int read_time()
 {
 	// removing for now
 	// assert(cin);
-	int time;
-	cin >> time;
+	int time = read_int();
+	check_time_in_range(time);
+	return time;
+}
+
+int read_int()
+{
+	int temp;
+	cin >> temp;
 	if (!cin) {
 		cin.clear();
 		throw Error("Could not read an integer value!");
 	}
-	check_time_in_range(time);
-	return time;
+	return temp;
+}
+
+/* this function returns an iterator to the person in the list whos last
+   name is lexicographically larger than or equal to the given lastname
+   otherwise returns iterator to the end of people */
+people_list_t::iterator get_Person_itr(people_list_t& people, string lastname)
+{
+	return find_if_not(people.begin(), people.end(), [lastname](const Person* s) { return s->get_lastname() < lastname; });
 }
 
 // if get_Person_itr returns the correct person (as determined by lastname)
@@ -186,7 +199,7 @@ int read_time()
 // error
 const Person* get_Person_ptr(people_list_t& people, string lastname)
 {
-	people_itr_t person_itr = get_Person_itr(people, lastname);
+	auto person_itr = get_Person_itr(people, lastname);
 	if (person_itr == people.end() || (*person_itr)->get_lastname() != lastname) {
 		throw Error("No person with that name!");
 	}
@@ -195,9 +208,9 @@ const Person* get_Person_ptr(people_list_t& people, string lastname)
 
 // returns an iterator to the position where a new person with supplied lastname
 // would go. throws an error if a person with that lastname already exists
-people_itr_t get_position_for_new_Person(people_list_t& people, string lastname)
+people_list_t::iterator get_position_for_new_Person(people_list_t& people, string lastname)
 {
-	people_itr_t position = get_Person_itr(people, lastname);
+	auto position = get_Person_itr(people, lastname);
 	if (position != people.end() && (*position)->get_lastname() == lastname) {
 		throw Error("There is already a person with this last name!");
 	}
@@ -205,7 +218,7 @@ people_itr_t get_position_for_new_Person(people_list_t& people, string lastname)
 }
 
 // PI and subfunction definitions
-void pi(container_t& container)
+void pi(Container_t& container)
 {
 	string lastname;
 	cin >> lastname;
@@ -214,7 +227,7 @@ void pi(container_t& container)
 }
 
 // PR and subfunction definitions
-void pr(container_t& container)
+void pr(Container_t& container)
 {
 	Room room = read_no_and_get_room(container.rooms);
 	cout << room;
@@ -236,17 +249,12 @@ Room& read_no_and_get_room(room_list_t& rooms)
 room_list_t::iterator get_room_itr(room_list_t& rooms, int room_number)
 {
 	Room probe(room_number);
-	auto room_itr = get_position_for_new_Room(rooms, probe);
-	if (*room_itr == probe) {
+	auto room_itr = lower_bound(rooms.begin(), rooms.end(), probe);
+	if (room_itr != rooms.end() && *room_itr == probe) {
 		// found a match
 		return room_itr;
 	}
 	throw Error("No room with that number!");
-}
-
-room_list_t::iterator get_position_for_new_Room(room_list_t& rooms, Room& probe)
-{
-	return lower_bound(rooms.begin(), rooms.end(), probe);
 }
 
 
@@ -257,24 +265,14 @@ Room& get_room(room_list_t& rooms, int room_number)
 }
 
 // PM and subfunction definitions
-void pm(container_t& container)
+void pm(Container_t& container)
 {
 	Room room = read_no_and_get_room(container.rooms);
 	cout << room.get_Meeting(read_time());
 }
-/* 	checks if given time is in range
-	throws error if time isn't in range
-	otherwise returns */
-void check_time_in_range(int time) {
-	if ((time >= 1 && time <= 5) || (time >= 9 && time <= 12)) {
-		return;
-	}
-	else {
-		throw Error("Time is not in range!");
-	}
-}
 
-void ps(container_t& container)
+
+void ps(Container_t& container)
 {
 	if (container.rooms.empty())
 		cout << "List of rooms is empty" << endl;
@@ -283,18 +281,17 @@ void ps(container_t& container)
 	for_each(container.rooms.begin(), container.rooms.end(), [](const Room r) { cout << r; });
 }
 
-void pg(container_t& container)
+void pg(Container_t& container)
 {
-	list<const Person*> people = container.people;
-	if (people.empty())
+	if (container.people.empty())
 		cout << "List of people is empty" << endl;
 	else
-		cout << "Information for " << people.size() << " people:" << endl;
-	for_each(people.begin(), people.end(), [](const Person* p){ cout << *p << endl;});
+		cout << "Information for " << container.people.size() << " people:" << endl;
+	for_each(container.people.begin(), container.people.end(), [](const Person* p){ cout << *p << endl;});
 }
 
 // PA and subfunctino definitions
-void pa(container_t& container)
+void pa(Container_t& container)
 {
  	cout << "Memory allocations:" << endl;
  	cout << "Persons: " << container.people.size() << endl;
@@ -308,12 +305,12 @@ int num_meetings(room_list_t& rooms)
 	return sum;
 }
 
-void ai(container_t& container)
+void ai(Container_t& container)
 {
 	string firstname, lastname, phoneno;
 	cin >> firstname >> lastname >> phoneno;
 	Person* new_person;
-	people_itr_t position;
+	people_list_t::iterator position;
 	try {
 		new_person = new Person(firstname, lastname, phoneno);
 		position = get_position_for_new_Person(container.people, lastname);
@@ -328,20 +325,22 @@ void ai(container_t& container)
 	cout << "Person " << lastname << " added" << endl;
 }
 
-void ar(container_t& container)
+void ar(Container_t& container)
 {
 	int room_number = read_room_number();
 	Room probe(room_number);
-	// test if the item is already there
-	if (binary_search(container.rooms.begin(), container.rooms.end(), probe)) {
-		throw Error("There is already a room with this number!");
-	}
+
 	auto insert = lower_bound(container.rooms.begin(), container.rooms.end(), probe);
-	container.rooms.insert(insert, probe);
-	cout << "Room " << room_number << " added" << endl;
+
+	if (insert == container.rooms.end() || *insert != probe) {
+		container.rooms.insert(insert, probe);
+		cout << "Room " << room_number << " added" << endl;
+		return;
+	}
+	throw Error("There is already a room with this number!");
 }
 
-void am(container_t& container)
+void am(Container_t& container)
 {
 	Room& room = read_no_and_get_room(container.rooms);
 	
@@ -355,7 +354,7 @@ void am(container_t& container)
 	cout << "Meeting added at " << time << endl;
 }
 
-void ap(container_t& container)
+void ap(Container_t& container)
 {
 	Room& room = read_no_and_get_room(container.rooms);
 
@@ -375,7 +374,7 @@ void ap(container_t& container)
 	cout << "Participant " << lastname << " added" << endl;
 }
 
-void rm(container_t& container)
+void rm(Container_t& container)
 {
 	// read and error check old_room_no
 	int old_room_no = read_room_number();
@@ -417,12 +416,12 @@ void rm(container_t& container)
 	cout << "Meeting rescheduled to room " << new_room_no << " at " << new_time << endl;
 }
 
-void di(container_t& container)
+void di(Container_t& container)
 {
 	string lastname;
 	cin >> lastname;
 
-	people_itr_t person = get_Person_itr(container.people, lastname);
+	auto person = get_Person_itr(container.people, lastname);
 
 	// now need to determine if this person is in any meetings
 	// TODO: use commitments maw fucka
@@ -433,12 +432,8 @@ void di(container_t& container)
 	container.people.erase(person);
 	cout << "Person " << lastname << " deleted" << endl;
 }
-bool is_participant_present_wrapper(Room room, const Person* p)
-{
-	return room.is_participant_present(p);
-}
 
-void dr(container_t& container)
+void dr(Container_t& container)
 {
 	int room_number = read_room_number();
 	room_list_t::iterator room = get_room_itr(container.rooms, room_number);
@@ -448,7 +443,7 @@ void dr(container_t& container)
 	cout << "Room " << room_number << " deleted" << endl;
 }
 
-void dm(container_t& container)
+void dm(Container_t& container)
 {
 	Room& room = read_no_and_get_room(container.rooms);
 
@@ -457,7 +452,7 @@ void dm(container_t& container)
 	cout << "Meeting at " << time << " deleted" << endl;
 }
 
-void dp(container_t& container)
+void dp(Container_t& container)
 {
 	Room& room = read_no_and_get_room(container.rooms);
 
@@ -476,13 +471,13 @@ void dp(container_t& container)
 	cout << "Participant " << lastname << " deleted" << endl;
 }
 
-void ds(container_t& container)
+void ds(Container_t& container)
 {
 	for_each(container.rooms.begin(), container.rooms.end(), [](Room& r){ r.clear_Meetings(); });
 	cout << "All meetings deleted" << endl;
 }
 
-void dg(container_t& container)
+void dg(Container_t& container)
 {
 	dg_no_messages(container.rooms, container.people);
 	cout << "All persons deleted" << endl;
@@ -500,7 +495,7 @@ void dg_no_messages(room_list_t& rooms, people_list_t& people)
 	people.clear();
 }
 
-void da(container_t& container)
+void da(Container_t& container)
 {
 	container.rooms.clear();
 	cout << "All rooms and meetings deleted" << endl;
@@ -515,7 +510,7 @@ void da_no_messages(room_list_t& rooms, people_list_t& people)
 	dg_no_messages(rooms, people);
 }
 
-void sd(container_t& container)
+void sd(Container_t& container)
 {
 	string filename;
 	cin >> filename;
@@ -540,19 +535,19 @@ void sd(container_t& container)
 	cout << "Data saved" << endl;
 }
 
-void set_container_and_close_file(container_t& container, ifstream& file, people_list_t& people_backup, room_list_t& rooms_backup)
+void set_container_and_close_file(Container_t& container, ifstream& file, people_list_t& people_backup, room_list_t& rooms_backup)
 {
 	set_backups(container, people_backup, rooms_backup);
 	file.close();
 }
 
-void set_container_and_close_file(container_t& container, ofstream& file, people_list_t& people_backup, room_list_t& rooms_backup)
+void set_container_and_close_file(Container_t& container, ofstream& file, people_list_t& people_backup, room_list_t& rooms_backup)
 {
 	set_backups(container, people_backup, rooms_backup);
 	file.close();
 }
 
-void set_backups(container_t& container, people_list_t& people_backup, room_list_t& rooms_backup)
+void set_backups(Container_t& container, people_list_t& people_backup, room_list_t& rooms_backup)
 {
 	container.people.swap(people_backup);
 	container.rooms.swap(rooms_backup);
@@ -560,7 +555,7 @@ void set_backups(container_t& container, people_list_t& people_backup, room_list
 	rooms_backup.clear();
 }
 
-void ld(container_t& container)
+void ld(Container_t& container)
 {
 	// loops are allowed in here yaaaaaaaay
 	string filename;
@@ -589,13 +584,12 @@ void ld(container_t& container)
 		// read in each person
 		const Person* new_person;
 		try {
-			new_person = new Person(input_file);
-			auto position = get_position_for_new_Person(container.people, new_person->get_lastname());
-			container.people.insert(position, new_person);
-		} catch (Error& e) {
-			// need to delete the new person
-			delete new_person;
-			throw Error("Invalid data found in file!");
+		new_person = new Person(input_file);
+		// use push back since the person list will be in alphabetical order
+		container.people.push_back(new_person);
+		} catch (bad_alloc& e) {
+			cerr << "Loading failed (ran out of memory)" << endl;
+			exit(1);
 		}
 	}
 	// read in number of rooms
@@ -606,7 +600,7 @@ void ld(container_t& container)
 	for (int i = 0; i < max; ++i) {
 		// read in each room
 		Room new_room(input_file, container.people);
-		room_list_t::iterator position = get_position_for_new_Room(container.rooms, new_room);
+		room_list_t::iterator position = lower_bound(container.rooms.begin(), container.rooms.end(), new_room);
 		container.rooms.insert(position, new_room);
 	}
 	// done!

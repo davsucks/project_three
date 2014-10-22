@@ -1,6 +1,6 @@
 #include "Meeting.h"
 #include <algorithm>
-#include <functional>
+#include <iterator>
 using namespace std;
 using namespace std::placeholders;
 
@@ -37,6 +37,7 @@ Meeting::Meeting(std::ifstream& is, const people_list_t& people)
 	is >> time;
 	is >> topic;
 	is >> num_participants;
+
 	// read in all participants
 	std::string lastname;
 	auto participant_itr = participants.begin();
@@ -47,17 +48,15 @@ Meeting::Meeting(std::ifstream& is, const people_list_t& people)
 		// try to find existing person
 		Person probe(lastname);
 		person_itr = lower_bound(people.begin(), people.end(), &probe, comp_participants());
-		if (person_itr == people.end()) {
-			// couldn't find person in the people list
+		if (person_itr == people.end() || (*person_itr)->get_lastname() != probe.get_lastname())
 			throw Error("Invalid data found in file!");
-		}
 
 		// person exists so insert!
 		participant_itr = lower_bound(participants.begin(), participants.end(), &probe, comp_participants());
 		participants.insert(participant_itr, *person_itr);
 	}
 
-	if(is.bad())
+	if(!is)
 		throw Error("Invalid data found in file!");
 }
 
@@ -120,8 +119,8 @@ std::ostream& operator<< (std::ostream& os, const Meeting& meeting)
 		os << " None" << endl;
 	} else {
 		os << endl;
-		for_each(meeting.participants.begin(), meeting.participants.end(), [&os](const Person* p) { os << *p << endl; });
-
+		ostream_iterator<const Person*> out_it(os, "\n");
+		copy(meeting.participants.begin(), meeting.participants.end(), out_it);
 	}
 	return os;
 }

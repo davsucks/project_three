@@ -26,3 +26,9 @@ std::ostream& operator<< (std::ostream& os, const Person& person)
 	os << person.firstname << " " << person.lastname << " " << person.phoneno;
 	return os;
 }
+
+std::ostream& operator<< (std::ostream& os, const Person* person)
+{
+	os << *person;
+	return os;
+}

@@ -16,9 +16,6 @@ We let the compiler supply the destructor and the copy/move constructors and ass
 
 #include "Person.h"
 #include "Utility.h"
-#include <fstream>
-#include <iostream>
-#include <string>
 #include <set>
 
 class Meeting {

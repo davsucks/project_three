@@ -47,6 +47,7 @@ public:
 		{return (!(this < &rhs) && !(&rhs < this));}
 
 	friend std::ostream& operator<< (std::ostream& os, const Person& person);
+	friend std::ostream& operator<< (std::ostream& os, const Person* person);
 
 private:
 	std::string firstname;
@@ -57,5 +58,6 @@ private:
 
 // output firstname, lastname, phoneno with one separating space, NO endl
 std::ostream& operator<< (std::ostream& os, const Person& person);
+std::ostream& operator<< (std::ostream& os, const Person* person);
 
 #endif

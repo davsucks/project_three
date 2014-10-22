@@ -48,7 +48,7 @@ void save_meeting(pair<int, Meeting>, ostream&);
  		meetings.insert(new_pair);
  	}
 
- 	if (is.bad())
+ 	if (!is)
  		throw Error("Invalid data found in file!");
  }
 				

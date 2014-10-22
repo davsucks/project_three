@@ -17,12 +17,7 @@ We let the compiler supply the destructor and copy/move constructors and assignm
 #ifndef ROOM_H
 #define ROOM_H
 
-#include "Person.h"
 #include "Meeting.h"
-#include "Utility.h"
-#include <iostream>
-#include <fstream>
-#include <string>
 #include <map>
 
 class Room {
@@ -51,7 +46,7 @@ public:
 	void add_Meeting(const Meeting& m);
 	// Return true if there is at least one meeting, false if none
 	bool has_Meetings() const
-		{return meetings.size();}
+		{return meetings.size() > 0;}
 	// Return the number of meetings in this room
 	int get_number_Meetings() const
 		{return meetings.size();}
@@ -75,7 +70,10 @@ public:
 		{return room_number < rhs.room_number;}	
 
 	bool operator== (const Room& rhs) const
-		{ return room_number == rhs.room_number;}	
+		{return room_number == rhs.room_number;}
+
+	bool operator!= (const Room& rhs) const
+		{return room_number != rhs.room_number;}
 
 	friend std::ostream& operator<< (std::ostream& os, const Room& room);
 

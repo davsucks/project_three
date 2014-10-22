@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include <list>
-#include <string>
 
 // a simple class for error exceptions - msg points to a C-string error message
 struct Error {
@@ -23,14 +22,12 @@ void p_person(const Person*, std::ostream&);
 
 // Declare types 
 using people_list_t = std::list<const Person*>;
-using people_itr_t = people_list_t::iterator;
 
-// used in main as well as meeting.cpp
-people_itr_t get_Person_itr(people_list_t&, std::string);
+// used in main and meeting.cpp
+void check_time_in_range(int);
 
 // forward declare class Room
 class Room;
 using room_list_t = std::vector<Room>;
-using room_iterator_t = room_list_t::iterator;
 
 #endif

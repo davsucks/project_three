@@ -1,149 +1,82 @@
 
-Enter command: Memory allocations:
-Persons: 0
-Meetings: 0
-Rooms: 0
-
-Enter command: List of people is empty
-
-Enter command: List of rooms is empty
-
 Enter command: Person Jones added
 
-Enter command: Person Marner added
-
 Enter command: Person John added
-
-Enter command: Silas Marner 456
-
-Enter command: Information for 3 people:
-Elton John 789
-Tom Jones 123
-Silas Marner 456
 
 Enter command: Room 1001 added
 
 Enter command: Room 1002 added
 
+Enter command: There is already a person with this last name!
+
+Enter command: There is already a room with this number!
+
+Enter command: Person Marner added
+
+Enter command: Information for 2 rooms:
+--- Room 1001 ---
+No meetings are scheduled
+--- Room 1002 ---
+No meetings are scheduled
+
+Enter command: Silas Marner 888
+
+Enter command: Could not read an integer value!
+
+Enter command: Room 5 added
+
+Enter command: Information for 3 rooms:
+--- Room 5 ---
+No meetings are scheduled
+--- Room 1001 ---
+No meetings are scheduled
+--- Room 1002 ---
+No meetings are scheduled
+
+Enter command: There is already a room with this number!
+
+Enter command: Room 6 added
+
+Enter command: Unrecognized command!
+
+Enter command: Could not read an integer value!
+
+Enter command: Information for 4 rooms:
+--- Room 5 ---
+No meetings are scheduled
+--- Room 6 ---
+No meetings are scheduled
+--- Room 1001 ---
+No meetings are scheduled
+--- Room 1002 ---
+No meetings are scheduled
+
+Enter command: Room 8 added
+
+Enter command: No room with that number!
+
 Enter command: Meeting added at 10
 
-Enter command: Meeting added at 2
-
-Enter command: Participant Jones added
-
-Enter command: Participant John added
-
-Enter command: --- Room 1001 ---
+Enter command: Information for 5 rooms:
+--- Room 5 ---
+No meetings are scheduled
+--- Room 6 ---
+No meetings are scheduled
+--- Room 8 ---
 Meeting time: 10, Topic: Music
-Participants:
-Elton John 789
-Tom Jones 123
-Meeting time: 2, Topic: Literature
 Participants: None
-
-Enter command: --- Room 1002 ---
-No meetings are scheduled
-
-Enter command: Meeting time: 10, Topic: Music
-Participants:
-Elton John 789
-Tom Jones 123
-
-Enter command: Meeting time: 2, Topic: Literature
-Participants: None
-
-Enter command: Data saved
-
-Enter command: Data loaded
-
-Enter command: Information for 2 rooms:
 --- Room 1001 ---
-Meeting time: 10, Topic: Music
-Participants:
-Elton John 789
-Tom Jones 123
-Meeting time: 2, Topic: Literature
-Participants: None
+No meetings are scheduled
 --- Room 1002 ---
 No meetings are scheduled
 
-Enter command: Memory allocations:
-Persons: 3
-Meetings: 2
-Rooms: 2
+Enter command: Person oops! added
 
-Enter command: No change made to schedule
-
-Enter command: Meeting rescheduled to room 1002 at 10
-
-Enter command: Meeting rescheduled to room 1001 at 10
-
-Enter command: Meeting rescheduled to room 1002 at 11
-
-Enter command: Meeting rescheduled to room 1002 at 3
-
-Enter command: Information for 2 rooms:
---- Room 1001 ---
-Meeting time: 2, Topic: Literature
-Participants: None
---- Room 1002 ---
-Meeting time: 3, Topic: Music
-Participants:
-Elton John 789
+Enter command: Information for 4 people:
+Elton John 456
 Tom Jones 123
-
-Enter command: Person Marner deleted
-
-Enter command: Participant John deleted
-
-Enter command: Information for 2 rooms:
---- Room 1001 ---
-Meeting time: 2, Topic: Literature
-Participants: None
---- Room 1002 ---
-Meeting time: 3, Topic: Music
-Participants:
-Tom Jones 123
-
-Enter command: Meeting at 3 deleted
-
-Enter command: --- Room 1002 ---
-No meetings are scheduled
-
-Enter command: Room 1001 deleted
-
-Enter command: Data saved
-
-Enter command: Data loaded
-
-Enter command: Information for 1 rooms:
---- Room 1002 ---
-No meetings are scheduled
-
-Enter command: Data loaded
-
-Enter command: Information for 2 rooms:
---- Room 1001 ---
-Meeting time: 10, Topic: Music
-Participants:
-Elton John 789
-Tom Jones 123
-Meeting time: 2, Topic: Literature
-Participants: None
---- Room 1002 ---
-No meetings are scheduled
-
-Enter command: All meetings deleted
-
-Enter command: All persons deleted
-
-Enter command: All rooms and meetings deleted
-All persons deleted
-
-Enter command: Memory allocations:
-Persons: 0
-Meetings: 0
-Rooms: 0
+Silas Marner 888
+TomJones123 oops! it_wants_enough_strings_to_complete_the_command
 
 Enter command: All rooms and meetings deleted
 All persons deleted
