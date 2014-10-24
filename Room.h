@@ -60,8 +60,6 @@ public:
 	void remove_Meeting(int time);
 	// Remove and destroy all meetings
 	void clear_Meetings();
-	// Return true if the person is present in any of the meetings
-	bool is_participant_present(Person* person_ptr) const;
 
 	// Write a Rooms's data to a stream in save format, with endl as specified.
 	void save(std::ostream& os) const;

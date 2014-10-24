@@ -103,12 +103,6 @@ void Room::clear_Meetings()
 	meetings.clear();
 }
 
-// Return true if the person is present in any of the meetings
-bool Room::is_participant_present(Person* person_ptr) const
-{
-	return any_of(meetings.begin(), meetings.end(), [person_ptr](pair<int, Meeting*> meeting_pair) { return meeting_pair.second->is_participant_present(person_ptr); });
-}
-
 // Write a Rooms's data to a stream in save format, with endl as specified.
 void Room::save(std::ostream& os) const
 {

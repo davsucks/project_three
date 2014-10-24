@@ -57,8 +57,6 @@ public:
 	// returns true if any participants in this meeting are committed at the new time
 	bool any_participants_committed(int time);
 
-	void create_Commitments(int room_number);
-
 	void update_Commitments(int old_time, int new_room_no, int new_time);
 			
 	// Write a Meeting's data to a stream in save format with final endl.

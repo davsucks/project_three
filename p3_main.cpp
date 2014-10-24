@@ -10,12 +10,6 @@ struct Container_t {
 	room_list_t rooms;
 };
 
-class pa_helper {
-public:
-
-private:
-
-};
 
 // types for the command map
 using CommandFunction = void (*)(Container_t&);
@@ -23,55 +17,39 @@ using command_map_t = map<string, CommandFunction>;
 
 // MAIN HELPER FUNCTIONS
 
-// General Helpers
+// General Helpers used by command functions
 void skip_line();
 int read_int();
 int read_room_number();
 int read_time();
-
-people_list_t::iterator get_Person_itr(people_list_t&, std::string);
+// Person helpers
 Person* get_Person_ptr(people_list_t&, string);
 people_list_t::iterator get_position_for_new_Person(people_list_t&, string);
 
-void pi(Container_t&);
-
-void pr(Container_t&);
-void check_room_no_in_range(int);
 Room& read_no_and_get_room(room_list_t&);
 room_list_t::iterator get_room_itr(room_list_t&, int);
 Room& get_room(room_list_t&, int);
 
+void set_container_and_close_file(Container_t& container, ifstream&, people_list_t&, room_list_t&);
+void set_backups(Container_t&, people_list_t&, room_list_t&);
+
+void pi(Container_t&);
+void pr(Container_t&);
 void pm(Container_t&);
-
 void ps(Container_t&);
-
 void pg(Container_t&);
-
 void pa(Container_t&);
-int num_meetings(room_list_t&);
-
 void pc(Container_t&);
-
 void ai(Container_t&);
-
 void ar(Container_t&);
-
 void am(Container_t&);
-
 void ap(Container_t&);
-
 void rm(Container_t&);
-
 void di(Container_t&);
-
 void dr(Container_t&);
-
 void dm(Container_t&);
-
 void dp(Container_t&);
-
 void ds(Container_t&);
-
 void dg(Container_t&);
 void dg_no_messages(room_list_t&, people_list_t&);
 
@@ -79,10 +57,6 @@ void da(Container_t&);
 void da_no_messages(room_list_t&, people_list_t&);
 
 void sd(Container_t&);
-
-void set_container_and_close_file(Container_t& container, ofstream&, people_list_t&, room_list_t&);
-void set_container_and_close_file(Container_t& container, ifstream&, people_list_t&, room_list_t&);
-void set_backups(Container_t&, people_list_t&, room_list_t&);
 void ld(Container_t&);
 
 int main() 
@@ -127,7 +101,6 @@ int main()
 		command += action;
 		command += item;
 		if (command == "qq") {
-			// quit
 			da(container);
 			cout << "Done" << endl;
 			return 0;
@@ -157,27 +130,44 @@ int main()
 	}
 }
 
+// GENERAL HELPER DEFINITIONS
+// reads from cin until a newline is read
 void skip_line()
 {
 	while (getchar() != '\n');
 }
-
+/* 	throws error if room number is invalid */
+void check_room_no_in_range(int room_number)
+{
+	if (room_number < 0)
+		throw Error("Room number is not in range!");
+}
+// reads an int from cin and checks if its in range for a room number
 int read_room_number()
 {
 	int room_number = read_int();
 	check_room_no_in_range(room_number);
 	return room_number;
 }
-
+/* 	checks if given time is in range
+	throws error if time isn't in range
+	otherwise returns */
+void check_time_in_range(int time) {
+	if ((time >= 1 && time <= 5) || (time >= 9 && time <= 12)) {
+		return;
+	}
+	else {
+		throw Error("Time is not in range!");
+	}
+}
+// reads an int from cin and checks if the time is in range
 int read_time()
 {
-	// removing for now
-	// assert(cin);
 	int time = read_int();
 	check_time_in_range(time);
 	return time;
 }
-
+// reads an int from cin and throws an error if it failed
 int read_int()
 {
 	int temp;
@@ -203,9 +193,9 @@ people_list_t::iterator get_Person_itr(people_list_t& people, string lastname)
 Person* get_Person_ptr(people_list_t& people, string lastname)
 {
 	auto person_itr = get_Person_itr(people, lastname);
-	if (person_itr == people.end() || (*person_itr)->get_lastname() != lastname) {
+	if (person_itr == people.end() || (*person_itr)->get_lastname() != lastname)
 		throw Error("No person with that name!");
-	}
+
 	return *person_itr;
 }
 
@@ -234,12 +224,6 @@ void pr(Container_t& container)
 {
 	Room& room = read_no_and_get_room(container.rooms);
 	cout << room;
-}
-/* 	throws error if room number is invalid */
-void check_room_no_in_range(int room_number)
-{
-	if (room_number < 0)
-		throw Error("Room number is not in range!");
 }
 
 Room& read_no_and_get_room(room_list_t& rooms)
@@ -271,7 +255,7 @@ Room& get_room(room_list_t& rooms, int room_number)
 void pm(Container_t& container)
 {
 	Room& room = read_no_and_get_room(container.rooms);
-	Meeting* meeting = room.get_Meeting(read_time());
+	const Meeting* meeting = room.get_Meeting(read_time());
 	cout << *meeting;
 }
 
@@ -294,27 +278,41 @@ void pg(Container_t& container)
 	for_each(container.people.begin(), container.people.end(), [](const Person* p){ cout << *p << endl;});
 }
 
+
+// function object used by the pa command
+class Meeting_calculator_t {
+public:
+	// this function sets the sum member variable
+	void operator()(room_list_t& rooms)
+	{
+		sum = 0;
+		for_each(rooms.begin(), rooms.end(), [this](const Room& r){ this->sum += r.get_number_Meetings(); });
+	}
+	int get_sum()
+	{
+		return sum;
+	}
+private:
+	int sum;
+};
+
 // PA and subfunctino definitions
 void pa(Container_t& container)
 {
+	Meeting_calculator_t num_meetings;
+	num_meetings(container.rooms);
  	cout << "Memory allocations:" << endl;
  	cout << "Persons: " << container.people.size() << endl;
- 	cout << "Meetings: " << num_meetings(container.rooms) << endl;
+ 	cout << "Meetings: " << num_meetings.get_sum() << endl;
  	cout << "Rooms: " << container.rooms.size() << endl;
 }
-int num_meetings(room_list_t& rooms)
-{
-	int sum = 0;
-	for_each(rooms.begin(), rooms.end(), [&sum](const Room& r){ sum += r.get_number_Meetings(); });
-	return sum;
-}
 
-void pc(Container_t& rooms)
+void pc(Container_t& container)
 {
 	string lastname;
 	cin >> lastname;
 
-	Person* person = get_Person_ptr(rooms.people, lastname);
+	Person* person = get_Person_ptr(container.people, lastname);
 	person->print_Commitments();
 }
 
@@ -436,15 +434,17 @@ void di(Container_t& container)
 	string lastname;
 	cin >> lastname;
 
-	auto person = get_Person_itr(container.people, lastname);
+	// fetch and error check the person
+	Person* person = get_Person_ptr(container.people, lastname);
 
 	// now need to determine if this person is in any meetings
-	// TODO: use commitments maw fucka
-	if (any_of(container.rooms.begin(), container.rooms.end(), [person](const Room& r){ return r.is_participant_present(*person); }))
+	if (person->has_Commitments())
 		throw Error("This person is a participant in a meeting!");
 
-	delete *person;
-	container.people.erase(person);
+	// fetch an iterator to make deleting easier
+	auto person_itr = get_Person_itr(container.people, lastname);
+	delete person;
+	container.people.erase(person_itr);
 	cout << "Person " << lastname << " deleted" << endl;
 }
 
@@ -463,9 +463,9 @@ void dm(Container_t& container)
 	Room& room = read_no_and_get_room(container.rooms);
 
 	int time = read_time();
-	Meeting* meeting = room.get_Meeting(time);
+	const Meeting* meeting = room.get_Meeting(time);
 	room.remove_Meeting(time);
-	// this should trigger meetings destructor, which will deallcoate all 
+	// this will trigger meetings destructor, which will deallcoate all 
 	// commitments associated with it
 	delete meeting;
 	cout << "Meeting at " << time << " deleted" << endl;
@@ -490,7 +490,8 @@ void dp(Container_t& container)
 
 void ds(Container_t& container)
 {
-	for_each(container.rooms.begin(), container.rooms.end(), [](Room& r){ r.clear_Meetings(); });
+	auto clear = mem_fn(&Room::clear_Meetings);
+	for_each(container.rooms.begin(), container.rooms.end(), [&clear](Room& r){ clear(r); });
 	cout << "All meetings deleted" << endl;
 }
 
@@ -556,12 +557,6 @@ void sd(Container_t& container)
 }
 
 void set_container_and_close_file(Container_t& container, ifstream& file, people_list_t& people_backup, room_list_t& rooms_backup)
-{
-	set_backups(container, people_backup, rooms_backup);
-	file.close();
-}
-
-void set_container_and_close_file(Container_t& container, ofstream& file, people_list_t& people_backup, room_list_t& rooms_backup)
 {
 	set_backups(container, people_backup, rooms_backup);
 	file.close();

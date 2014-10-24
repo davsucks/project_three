@@ -1,7 +1,6 @@
 #include "Meeting.h"
 #include <algorithm>
 #include <iterator>
-#include <functional>
 using namespace std;
 using namespace std::placeholders;
 

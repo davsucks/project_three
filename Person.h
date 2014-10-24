@@ -33,9 +33,6 @@ public:
 	// No check made for whether the Person already exists or not.
 	// Input for a member variable value is read directly into the member variable.
 	Person(std::ifstream& is);
-
-	// destroys all commitments associated with this person
-	~Person();
 	
 	// Accessors
 	std::string get_lastname() const
@@ -46,6 +43,8 @@ public:
 
 	// returns true if a person is committed at the provided time
 	bool is_committed_at(int);
+
+	bool has_Commitments();
 
 	// adds a commitment to this person commitments container
 	void add_Commitment(int room_no, int time, std::string topic);
@@ -84,9 +83,11 @@ private:
 	// two different containers, while slightly redundant, allows for commitment
 	// lookup in logarithmic time since only using one container would
 	// result in a linear search for is_committed_at, which is foribben as per the spec
+
+	// the first container maps room number to a commitment pointer
 	using Commitment_times_container_t = std::map<int, Commitment_t*, Comp_Commitments>;
 	Commitment_times_container_t commitment_times;
-
+	// the second container is just a set of commitment pointers
 	using Commitments_container_t = std::set<Commitment_t*, Comp_Commitments>;
 	Commitments_container_t commitments;
 

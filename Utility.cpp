@@ -16,18 +16,6 @@ int normalize_time(int time)
 		return time;
 }
 
-/* 	checks if given time is in range
-	throws error if time isn't in range
-	otherwise returns */
-void check_time_in_range(int time) {
-	if ((time >= 1 && time <= 5) || (time >= 9 && time <= 12)) {
-		return;
-	}
-	else {
-		throw Error("Time is not in range!");
-	}
-}
-
 void print_message_and_quit()
 {
 	cerr << "Ran out of memory!" << endl;

@@ -38,14 +38,6 @@ Person::Person(ifstream& is)
 		throw Error("Invalid data found in file!");
 }
 
-Person::~Person()
-{
-	// people shouldn't be allowed to be deleted if they are in meetings 
-	// aka they have commitments
-	assert(commitment_times.empty());
-	assert(commitments.empty());
-}
-
 // Write a Person's data to a stream in save format with final endl.
 void Person::save(std::ostream& os) const
 {
@@ -58,6 +50,11 @@ bool Person::is_committed_at(int time)
 	if (itr == commitment_times.end())
 		return false;
 	return true;
+}
+
+bool Person::has_Commitments()
+{
+	return commitment_times.size();
 }
 
 // adds a commitment to this person commitments container
