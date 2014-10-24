@@ -26,7 +26,7 @@ bool Room::comp_Meetings::operator() (const int& rhs, const int& lhs) const
 	return normalize_time(rhs) < normalize_time(lhs);
 }
 
-void save_meeting(pair<int, Meeting>, ostream&);
+void save_meeting(pair<int, Meeting*>, ostream&);
 
 // Construct a Room from an input file stream in save format, using the people list,
 // restoring all the Meeting information. 
@@ -42,10 +42,15 @@ void save_meeting(pair<int, Meeting>, ostream&);
  	int num_meetings;
  	is >> num_meetings;
 
+ 	try {
  	for (int i = 0; i < num_meetings && is.good(); ++i) {
- 		Meeting new_meeting(is, people_list);
- 		pair<int, Meeting> new_pair(new_meeting.get_time(), new_meeting);
+ 		Meeting* new_meeting = new Meeting(is, people_list, room_number);
+ 		pair<int, Meeting*> new_pair(new_meeting->get_time(), new_meeting);
  		meetings.insert(new_pair);
+ 	}
+ 	} catch (bad_alloc& e) {
+ 		cerr << "Not enough memory!" << endl;
+ 		exit(1);
  	}
 
  	if (!is)
@@ -57,11 +62,12 @@ void save_meeting(pair<int, Meeting>, ostream&);
 
 // Add the Meeting, throw exception if there is already a Meeting at that time.
 // A copy of the supplied Meeting is stored in the Meeting container.
-void Room::add_Meeting(const Meeting& m)
+void Room::add_Meeting(Meeting* m)
 {
-	if (is_Meeting_present(m.get_time()))
+	if (is_Meeting_present(m->get_time()))
 		throw Error("There is already a meeting at that time!");
-	meetings.insert( pair<int, Meeting>(m.get_time(), m) );
+	// add commitments
+	meetings.insert( pair<int, Meeting*>(m->get_time(), m) );
 }
 // Return true if there is a Meeting at the time, false if not.
 bool Room::is_Meeting_present(int time) const
@@ -72,7 +78,7 @@ bool Room::is_Meeting_present(int time) const
 	return true;
 }
 // Return a reference if the Meeting is present, throw exception if not.
-Meeting Room::get_Meeting(int time) const
+Meeting* Room::get_Meeting(int time) const
 {
 	if (!is_Meeting_present(time))
 		throw Error("No meeting at that time!");
@@ -84,12 +90,22 @@ void Room::remove_Meeting(int time)
 {
 	if (!is_Meeting_present(time))
 		throw Error("No meeting at that time!");
+	// erase the meeting from the container
 	meetings.erase(time);
 }
-// Return true if the person is present in any of the meetings
-bool Room::is_participant_present(const Person* person_ptr) const
+
+void Room::clear_Meetings()
 {
-	return any_of(meetings.begin(), meetings.end(), [person_ptr](pair<int, Meeting> meeting_pair) { return meeting_pair.second.is_participant_present(person_ptr); });
+	// deallocate every meeting node
+	for_each(meetings.begin(), meetings.end(), [](pair<int, Meeting*> meeting_p){ delete meeting_p.second; });
+	// now clear the map
+	meetings.clear();
+}
+
+// Return true if the person is present in any of the meetings
+bool Room::is_participant_present(Person* person_ptr) const
+{
+	return any_of(meetings.begin(), meetings.end(), [person_ptr](pair<int, Meeting*> meeting_pair) { return meeting_pair.second->is_participant_present(person_ptr); });
 }
 
 // Write a Rooms's data to a stream in save format, with endl as specified.
@@ -100,9 +116,9 @@ void Room::save(std::ostream& os) const
 	for_each(meetings.begin(), meetings.end(), bound_save);
 }
 
-void save_meeting(pair<int, Meeting> meeting, ostream& os)
+void save_meeting(pair<int, Meeting*> meeting, ostream& os)
 {
-	meeting.second.save(os);
+	meeting.second->save(os);
 }
 	
 // Print the Room data as follows:
@@ -113,7 +129,7 @@ std::ostream& operator<< (std::ostream& os, const Room& room)
 {
 	os << "--- Room " << room.get_room_number() << " ---" << endl;
 	if (room.has_Meetings())
-		for_each(room.meetings.begin(), room.meetings.end(), [&os](pair<int, Meeting> meeting_pair) { os << meeting_pair.second; });
+		for_each(room.meetings.begin(), room.meetings.end(), [&os](pair<int, Meeting*> meeting_pair) { os << *(meeting_pair.second); });
 	else
 		os << "No meetings are scheduled" << endl;
 	return os;

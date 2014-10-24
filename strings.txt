@@ -19,7 +19,7 @@ Project 2.
 
 // messages used to initialize an exception Error object
 //  - your choice on which module is responsible for these
- "Person is already committed at that time!" 
+ "Person is already committed at that time!"
  "A participant is already committed at the new time!"
 
 // STRING FROM PROJECT_TWO RIGHT HERE

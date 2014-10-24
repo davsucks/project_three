@@ -1,6 +1,7 @@
 #include "Meeting.h"
 #include <algorithm>
 #include <iterator>
+#include <functional>
 using namespace std;
 using namespace std::placeholders;
 
@@ -31,7 +32,7 @@ void save_person(const Person*, std::ostream&);
 // No check made for whether the Meeting already exists or not.
 // Person list is needed to resolve references to meeting participants
 // Input for a member variable value is read directly into the member variable.
-Meeting::Meeting(std::ifstream& is, const people_list_t& people)
+Meeting::Meeting(std::ifstream& is, const people_list_t& people, int room_number)
 {
 	int num_participants;
 	is >> time;
@@ -53,6 +54,7 @@ Meeting::Meeting(std::ifstream& is, const people_list_t& people)
 
 		// person exists so insert!
 		participant_itr = lower_bound(participants.begin(), participants.end(), &probe, comp_participants());
+		// (*person_itr)->add_Commitment(room_number, time, topic);
 		participants.insert(participant_itr, *person_itr);
 	}
 
@@ -60,32 +62,63 @@ Meeting::Meeting(std::ifstream& is, const people_list_t& people)
 		throw Error("Invalid data found in file!");
 }
 
+Meeting::~Meeting()
+{
+	// just need to destroy all the commitments associated with everyone
+	// attending this meeting
+
+	// for_each(participants.begin(), participants.end(), [this](Person* p){ p->remove_Commitment(this->time); });
+}
+
 // Meeting objects manage their own participant list. Participants
 // are identified by a pointer to that individual's Person object.
 
 // Add to the list, throw exception if participant was already there.
-void Meeting::add_participant(const Person* p)
+void Meeting::add_participant(Person* p, int room_number)
 {
 	// need to probe the participants list
 	if (is_participant_present(p))
 		throw Error("This person is already a participant!");
 
+	// make sure the person isn't already committed
+	if (p->is_committed_at(time))
+		throw Error("Person is already committed at that time!");
+
 	auto insert_pos = lower_bound(participants.begin(), participants.end(), p, comp_participants());
+
+	// add the commitment
+	// p->add_Commitment(room_number, time, topic);
+	// add the participant
 	participants.insert(insert_pos, p);
 }
 // Return true if the person is a participant, false if not.
-bool Meeting::is_participant_present(const Person* p) const
+bool Meeting::is_participant_present(Person* p) const
 {
 	return binary_search(participants.begin(), participants.end(), p, comp_participants());
 }
 // Remove from the list, throw exception if participant was not found.
-void Meeting::remove_participant(const Person* p)
+void Meeting::remove_participant(Person* p)
 {
 	if (!is_participant_present(p))
 		throw Error("This person is not a participant in the meeting!" );
 
 	auto remove_pos = lower_bound(participants.begin(), participants.end(), p, comp_participants());
+
+	// remove the person's commitment
+	// p->remove_Commitment(time);
+	// remove the person from participants
 	participants.erase(remove_pos);
+}
+
+// returns true if any participants in this meeting are committed at the new time
+bool Meeting::any_participants_committed(int time)
+{
+	return any_of(participants.begin(), participants.end(), [time](Person* p) { return p->is_committed_at(time); });
+}
+
+void Meeting::update_Commitments(int old_time, int new_room_no, int new_time)
+{
+	for_each(participants.begin(), participants.end(), [old_time, new_room_no, new_time](Person* p){ p->update_Commitment(old_time, new_room_no, new_time); });
 }
 		
 // Write a Meeting's data to a stream in save format with final endl.

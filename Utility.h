@@ -21,7 +21,7 @@ class Person;
 void p_person(const Person*, std::ostream&);
 
 // Declare types 
-using people_list_t = std::list<const Person*>;
+using people_list_t = std::list<Person*>;
 
 // used in main and meeting.cpp
 void check_time_in_range(int);

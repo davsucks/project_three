@@ -30,7 +30,7 @@ int read_room_number();
 int read_time();
 
 people_list_t::iterator get_Person_itr(people_list_t&, std::string);
-const Person* get_Person_ptr(people_list_t&, string);
+Person* get_Person_ptr(people_list_t&, string);
 people_list_t::iterator get_position_for_new_Person(people_list_t&, string);
 
 void pi(Container_t&);
@@ -49,6 +49,8 @@ void pg(Container_t&);
 
 void pa(Container_t&);
 int num_meetings(room_list_t&);
+
+void pc(Container_t&);
 
 void ai(Container_t&);
 
@@ -99,6 +101,7 @@ int main()
 	command_map["ps"] = &ps;
 	command_map["pg"] = &pg;
 	command_map["pa"] = &pa;
+	command_map["pc"] = &pc;
 	command_map["ai"] = &ai;
 	command_map["ar"] = &ar;
 	command_map["am"] = &am;
@@ -197,7 +200,7 @@ people_list_t::iterator get_Person_itr(people_list_t& people, string lastname)
 // if get_Person_itr returns the correct person (as determined by lastname)
 // returns a pointer to that person, otherwise throws no person with lastname
 // error
-const Person* get_Person_ptr(people_list_t& people, string lastname)
+Person* get_Person_ptr(people_list_t& people, string lastname)
 {
 	auto person_itr = get_Person_itr(people, lastname);
 	if (person_itr == people.end() || (*person_itr)->get_lastname() != lastname) {
@@ -229,7 +232,7 @@ void pi(Container_t& container)
 // PR and subfunction definitions
 void pr(Container_t& container)
 {
-	Room room = read_no_and_get_room(container.rooms);
+	Room& room = read_no_and_get_room(container.rooms);
 	cout << room;
 }
 /* 	throws error if room number is invalid */
@@ -267,8 +270,9 @@ Room& get_room(room_list_t& rooms, int room_number)
 // PM and subfunction definitions
 void pm(Container_t& container)
 {
-	Room room = read_no_and_get_room(container.rooms);
-	cout << room.get_Meeting(read_time());
+	Room& room = read_no_and_get_room(container.rooms);
+	Meeting* meeting = room.get_Meeting(read_time());
+	cout << *meeting;
 }
 
 
@@ -278,7 +282,7 @@ void ps(Container_t& container)
 		cout << "List of rooms is empty" << endl;
 	else
 		cout << "Information for " << container.rooms.size() << " rooms:" << endl;
-	for_each(container.rooms.begin(), container.rooms.end(), [](const Room r) { cout << r; });
+	for_each(container.rooms.begin(), container.rooms.end(), [](const Room& r) { cout << r; });
 }
 
 void pg(Container_t& container)
@@ -301,8 +305,17 @@ void pa(Container_t& container)
 int num_meetings(room_list_t& rooms)
 {
 	int sum = 0;
-	for_each(rooms.begin(), rooms.end(), [&sum](const Room r){ sum += r.get_number_Meetings(); });
+	for_each(rooms.begin(), rooms.end(), [&sum](const Room& r){ sum += r.get_number_Meetings(); });
 	return sum;
+}
+
+void pc(Container_t& rooms)
+{
+	string lastname;
+	cin >> lastname;
+
+	Person* person = get_Person_ptr(rooms.people, lastname);
+	person->print_Commitments();
 }
 
 void ai(Container_t& container)
@@ -349,8 +362,17 @@ void am(Container_t& container)
 	string topic;
 	cin >> topic;
 
-	Meeting meeting(time, topic);
-	room.add_Meeting(meeting);
+	Meeting* meeting;
+	try {
+		meeting = new Meeting(time, topic);
+		room.add_Meeting(meeting);
+	} catch (Error& e) {
+		delete meeting;
+		throw;
+	} catch (bad_alloc& e) {
+		cerr << "Not enough memory!" << endl;
+		exit(1);
+	}
 	cout << "Meeting added at " << time << endl;
 }
 
@@ -359,17 +381,14 @@ void ap(Container_t& container)
 	Room& room = read_no_and_get_room(container.rooms);
 
 	int time = read_time();
-	Meeting meeting = room.get_Meeting(time);
+	Meeting* meeting = room.get_Meeting(time);
 
 	string lastname;
 	cin >> lastname;
 
-	const Person* person = get_Person_ptr(container.people, lastname);
+	Person* person = get_Person_ptr(container.people, lastname);
 
-	meeting.add_participant(person);
-	// TODO: fix this shite
-	room.remove_Meeting(time);
-	room.add_Meeting(meeting);
+	meeting->add_participant(person, room.get_room_number());
 
 	cout << "Participant " << lastname << " added" << endl;
 }
@@ -382,7 +401,7 @@ void rm(Container_t& container)
 
 	// read and error check old_time
 	int old_time = read_time();
-	Meeting old_meeting = old_room.get_Meeting(old_time);
+	Meeting* old_meeting = old_room.get_Meeting(old_time);
 
 	// read and error check new_room_no
 	int new_room_no = read_room_number();
@@ -397,20 +416,18 @@ void rm(Container_t& container)
 		return;
 	}
 
-	// remove
-	old_room.remove_Meeting(old_time);
-	// change
-	old_meeting.set_time(new_time);
-	// copy
-	try {
+	// check that the new time is available for the meeting in the new room
+	if (new_room.is_Meeting_present(new_time))
+		throw Error("There is already a meeting at that time!");
+	// check whether a change in meeting time causes commitment conflict for a participant
+	if (new_time != old_time && old_meeting->any_participants_committed(new_time))
+		throw Error("A participant is already committed at the new time!");
+
+	old_meeting->set_time(new_time);
 	new_room.add_Meeting(old_meeting);
-	} catch (Error& e) {
-		// there was already a meeting at that time
-		// add the old meeting back into its old time, then rethrow
-		old_meeting.set_time(old_time);
-		old_room.add_Meeting(old_meeting);
-		throw;
-	}
+	// adding was successful, so now remove the old meeting
+	old_room.remove_Meeting(old_time);
+	// old_meeting->update_Commitments(old_time, new_room_no, new_time);
 
 	// now remove old room
 	cout << "Meeting rescheduled to room " << new_room_no << " at " << new_time << endl;
@@ -448,7 +465,9 @@ void dm(Container_t& container)
 	Room& room = read_no_and_get_room(container.rooms);
 
 	int time = read_time();
+	Meeting* meeting = room.get_Meeting(time);
 	room.remove_Meeting(time);
+	delete meeting;
 	cout << "Meeting at " << time << " deleted" << endl;
 }
 
@@ -458,16 +477,17 @@ void dp(Container_t& container)
 
 	int time = read_time();
 
-	Meeting meeting = room.get_Meeting(time);
+	Meeting* meeting = room.get_Meeting(time);
 
 	string lastname;
 	cin >> lastname;
-	const Person* person = get_Person_ptr(container.people, lastname);
+	Person* person = get_Person_ptr(container.people, lastname);
 
-	meeting.remove_participant(person);
-	// TODO: FIX THIS SHITE
-	room.remove_Meeting(time);
-	room.add_Meeting(meeting);
+	meeting->remove_participant(person);
+	
+	// todo: shouldn't need this anymore
+	// room.remove_Meeting(time);
+	// room.add_Meeting(meeting);
 	cout << "Participant " << lastname << " deleted" << endl;
 }
 
@@ -497,6 +517,8 @@ void dg_no_messages(room_list_t& rooms, people_list_t& people)
 
 void da(Container_t& container)
 {
+	// need to delete all meetings from each room
+	for_each(container.rooms.begin(), container.rooms.end(), [](Room& r){ r.clear_Meetings(); });
 	container.rooms.clear();
 	cout << "All rooms and meetings deleted" << endl;
 	// need to pay special attention to people since the people
@@ -506,6 +528,7 @@ void da(Container_t& container)
 
 void da_no_messages(room_list_t& rooms, people_list_t& people)
 {
+	for_each(rooms.begin(), rooms.end(), [](Room& r){ r.clear_Meetings(); });
 	rooms.clear();
 	dg_no_messages(rooms, people);
 }
@@ -551,7 +574,11 @@ void set_backups(Container_t& container, people_list_t& people_backup, room_list
 {
 	container.people.swap(people_backup);
 	container.rooms.swap(rooms_backup);
+	// delete all allocated people
+	for_each(people_backup.begin(), people_backup.end(), [](Person* p){ delete p; });
 	people_backup.clear();
+	// clear meetings from old rooms
+	for_each(rooms_backup.begin(), rooms_backup.end(), [](Room& r){ r.clear_Meetings(); });
 	rooms_backup.clear();
 }
 
@@ -566,11 +593,13 @@ void ld(Container_t& container)
 		throw Error("Could not open file!");
 
 	// clear all data
-	room_list_t rooms_backup(container.rooms);
-	people_list_t people_backup(container.people);
+	// room_list_t rooms_backup(container.rooms);
+	// people_list_t people_backup(container.people);
+	room_list_t new_room_list;
+	people_list_t new_people_list;
 
-	container.people.clear();
-	container.rooms.clear();
+	// container.people.clear();
+	// container.rooms.clear();
 
 	try {
 	// file format:
@@ -582,11 +611,11 @@ void ld(Container_t& container)
 
 	for (int i = 0; i < max; ++i) {
 		// read in each person
-		const Person* new_person;
+		Person* new_person;
 		try {
 		new_person = new Person(input_file);
 		// use push back since the person list will be in alphabetical order
-		container.people.push_back(new_person);
+		new_people_list.push_back(new_person);
 		} catch (bad_alloc& e) {
 			cerr << "Loading failed (ran out of memory)" << endl;
 			exit(1);
@@ -599,18 +628,17 @@ void ld(Container_t& container)
 
 	for (int i = 0; i < max; ++i) {
 		// read in each room
-		Room new_room(input_file, container.people);
-		room_list_t::iterator position = lower_bound(container.rooms.begin(), container.rooms.end(), new_room);
-		container.rooms.insert(position, new_room);
+		Room new_room(input_file, new_people_list);
+		room_list_t::iterator position = lower_bound(new_room_list.begin(), new_room_list.end(), new_room);
+		new_room_list.insert(position, new_room);
 	}
 	// done!
-	}
-	catch(Error& e) {
-		da_no_messages(container.rooms, container.people);
-		set_container_and_close_file(container, input_file, people_backup, rooms_backup);
+	} catch(Error& e) {
+		da_no_messages(new_room_list, new_people_list);
+		// set_container_and_close_file(container, input_file, people_backup, rooms_backup);
+		input_file.close();
 		throw;
 	}
-	da_no_messages(rooms_backup, people_backup);
-	input_file.close();
+	set_container_and_close_file(container, input_file, new_people_list, new_room_list);
 	cout << "Data loaded" << endl;
 }

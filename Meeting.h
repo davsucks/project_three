@@ -33,7 +33,10 @@ public:
 	// No check made for whether the Meeting already exists or not.
 	// Person list is needed to resolve references to meeting participants
 	// Input for a member variable value is read directly into the member variable.
-	Meeting(std::ifstream& is, const people_list_t& people);
+	Meeting(std::ifstream& is, const people_list_t& people, int room_number);
+
+	// used to completely destroy commitments
+	~Meeting();
 
 	// accessors
 	int get_time() const
@@ -45,11 +48,18 @@ public:
 	// are identified by a pointer to that individual's Person object.
 
 	// Add to the list, throw exception if participant was already there.
-	void add_participant(const Person* p);
+	void add_participant(Person* p, int room_number);
 	// Return true if the person is a participant, false if not.
-	bool is_participant_present(const Person* p) const;
+	bool is_participant_present(Person* p) const;
 	// Remove from the list, throw exception if participant was not found.
-	void remove_participant(const Person* p);
+	void remove_participant(Person* p);
+
+	// returns true if any participants in this meeting are committed at the new time
+	bool any_participants_committed(int time);
+
+	void create_Commitments(int room_number);
+
+	void update_Commitments(int old_time, int new_room_no, int new_time);
 			
 	// Write a Meeting's data to a stream in save format with final endl.
 	void save(std::ostream& os) const;
@@ -63,7 +73,7 @@ private:
 	struct comp_participants {
 		bool operator() (const Person*, const Person*) const;
 	};
-	using Participants_t = std::set<const Person*, comp_participants>;
+	using Participants_t = std::set<Person*, comp_participants>;
 	Participants_t participants;
 	
 	int time;

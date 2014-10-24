@@ -34,6 +34,8 @@ public:
 	// Input for a member variable value is read directly into the member variable.
 	 Room(std::ifstream& is, const people_list_t& people_list);
 
+	 // ~Room();
+
 	// Accessors
 	int get_room_number() const
 		{return room_number;}
@@ -43,7 +45,7 @@ public:
 
 	// Add the Meeting, throw exception if there is already a Meeting at that time.
 	// A copy of the supplied Meeting is stored in the Meeting container.
-	void add_Meeting(const Meeting& m);
+	void add_Meeting(Meeting* m);
 	// Return true if there is at least one meeting, false if none
 	bool has_Meetings() const
 		{return meetings.size() > 0;}
@@ -53,14 +55,13 @@ public:
 	// Return true if there is a Meeting at the time, false if not.
 	bool is_Meeting_present(int time) const;
 	// Return a reference if the Meeting is present, throw exception if not.
-	Meeting get_Meeting(int time) const;
+	Meeting* get_Meeting(int time) const;
 	// Remove the specified Meeting, throw exception if a Meeting at that time was not found.
 	void remove_Meeting(int time);
 	// Remove and destroy all meetings
-	void clear_Meetings()
-		{meetings.clear();}
+	void clear_Meetings();
 	// Return true if the person is present in any of the meetings
-	bool is_participant_present(const Person* person_ptr) const;
+	bool is_participant_present(Person* person_ptr) const;
 
 	// Write a Rooms's data to a stream in save format, with endl as specified.
 	void save(std::ostream& os) const;
@@ -81,7 +82,7 @@ private:
 	struct comp_Meetings {
 		bool operator() (const int&, const int&) const;
 	};
-	using Meetings_t = std::map<int, Meeting, comp_Meetings>;
+	using Meetings_t = std::map<int, Meeting*, comp_Meetings>;
 	// your choice of other private member variables and functions
 	int room_number;
 	Meetings_t meetings;
