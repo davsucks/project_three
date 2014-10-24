@@ -49,8 +49,7 @@ void save_meeting(pair<int, Meeting*>, ostream&);
  		meetings.insert(new_pair);
  	}
  	} catch (bad_alloc& e) {
- 		cerr << "Not enough memory!" << endl;
- 		exit(1);
+ 		print_message_and_quit();
  	}
 
  	if (!is)
@@ -97,6 +96,8 @@ void Room::remove_Meeting(int time)
 void Room::clear_Meetings()
 {
 	// deallocate every meeting node
+	// NOTE: in deallocating a meeting node meetings destructor should be called
+	// which will, in turn, deallocate every commitment associated with it
 	for_each(meetings.begin(), meetings.end(), [](pair<int, Meeting*> meeting_p){ delete meeting_p.second; });
 	// now clear the map
 	meetings.clear();

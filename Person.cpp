@@ -67,8 +67,7 @@ void Person::add_Commitment(int room_no, int time, string topic)
 	try {
 		new_commitment = new Commitment_t(room_no, time, topic);
 	} catch (...) {
-		cerr << "There wasn't enough memory" << endl;
-		exit(1);
+		print_message_and_quit();
 	}
 	commitments.insert(new_commitment);
 	commitment_times.insert(pair<int, Commitment_t*>(time, new_commitment));

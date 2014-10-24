@@ -331,8 +331,7 @@ void ai(Container_t& container)
 		delete new_person;
 		throw;
 	} catch(bad_alloc& e) {
-		cerr << "Not enough memory!" << endl;
-		exit(1);
+		print_message_and_quit();
 	}
 	container.people.insert(position, new_person);
 	cout << "Person " << lastname << " added" << endl;
@@ -370,8 +369,7 @@ void am(Container_t& container)
 		delete meeting;
 		throw;
 	} catch (bad_alloc& e) {
-		cerr << "Not enough memory!" << endl;
-		exit(1);
+		print_message_and_quit();
 	}
 	cout << "Meeting added at " << time << endl;
 }
@@ -427,7 +425,7 @@ void rm(Container_t& container)
 	new_room.add_Meeting(old_meeting);
 	// adding was successful, so now remove the old meeting
 	old_room.remove_Meeting(old_time);
-	// old_meeting->update_Commitments(old_time, new_room_no, new_time);
+	old_meeting->update_Commitments(old_time, new_room_no, new_time);
 
 	// now remove old room
 	cout << "Meeting rescheduled to room " << new_room_no << " at " << new_time << endl;
@@ -467,6 +465,8 @@ void dm(Container_t& container)
 	int time = read_time();
 	Meeting* meeting = room.get_Meeting(time);
 	room.remove_Meeting(time);
+	// this should trigger meetings destructor, which will deallcoate all 
+	// commitments associated with it
 	delete meeting;
 	cout << "Meeting at " << time << " deleted" << endl;
 }
@@ -484,10 +484,7 @@ void dp(Container_t& container)
 	Person* person = get_Person_ptr(container.people, lastname);
 
 	meeting->remove_participant(person);
-	
-	// todo: shouldn't need this anymore
-	// room.remove_Meeting(time);
-	// room.add_Meeting(meeting);
+
 	cout << "Participant " << lastname << " deleted" << endl;
 }
 
@@ -574,17 +571,17 @@ void set_backups(Container_t& container, people_list_t& people_backup, room_list
 {
 	container.people.swap(people_backup);
 	container.rooms.swap(rooms_backup);
-	// delete all allocated people
-	for_each(people_backup.begin(), people_backup.end(), [](Person* p){ delete p; });
-	people_backup.clear();
 	// clear meetings from old rooms
 	for_each(rooms_backup.begin(), rooms_backup.end(), [](Room& r){ r.clear_Meetings(); });
 	rooms_backup.clear();
+	// delete all allocated people
+	for_each(people_backup.begin(), people_backup.end(), [](Person* p){ delete p; });
+	people_backup.clear();
+
 }
 
 void ld(Container_t& container)
 {
-	// loops are allowed in here yaaaaaaaay
 	string filename;
 	cin >> filename;
 
@@ -592,18 +589,15 @@ void ld(Container_t& container)
 	if (!input_file.is_open())
 		throw Error("Could not open file!");
 
-	// clear all data
-	// room_list_t rooms_backup(container.rooms);
-	// people_list_t people_backup(container.people);
+	// create new lists to populate
+	// that way if loading succeeds we just swap these lists
+	// with the container lists
+	// otherwise, just clear these lists and move on
 	room_list_t new_room_list;
 	people_list_t new_people_list;
 
-	// container.people.clear();
-	// container.rooms.clear();
-
 	try {
-	// file format:
-	// the number of people
+	// first read in the max number of people
 	int max;
 	input_file >> max;
 	if (!input_file)
@@ -617,8 +611,7 @@ void ld(Container_t& container)
 		// use push back since the person list will be in alphabetical order
 		new_people_list.push_back(new_person);
 		} catch (bad_alloc& e) {
-			cerr << "Loading failed (ran out of memory)" << endl;
-			exit(1);
+			print_message_and_quit();
 		}
 	}
 	// read in number of rooms
@@ -635,7 +628,6 @@ void ld(Container_t& container)
 	// done!
 	} catch(Error& e) {
 		da_no_messages(new_room_list, new_people_list);
-		// set_container_and_close_file(container, input_file, people_backup, rooms_backup);
 		input_file.close();
 		throw;
 	}

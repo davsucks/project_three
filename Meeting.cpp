@@ -47,14 +47,15 @@ Meeting::Meeting(std::ifstream& is, const people_list_t& people, int room_number
 	for(int i = 0; i < num_participants && is.good(); ++i) {
 		is >> lastname;
 		// try to find existing person
-		Person probe(lastname);
-		person_itr = lower_bound(people.begin(), people.end(), &probe, comp_participants());
-		if (person_itr == people.end() || (*person_itr)->get_lastname() != probe.get_lastname())
+		person_itr = find_if_not(people.begin(), people.end(), [lastname](const Person* p){ return p->get_lastname() < lastname; });
+		if (person_itr == people.end() || (*person_itr)->get_lastname() != lastname)
 			throw Error("Invalid data found in file!");
 
 		// person exists so insert!
-		participant_itr = lower_bound(participants.begin(), participants.end(), &probe, comp_participants());
-		// (*person_itr)->add_Commitment(room_number, time, topic);
+		participant_itr = lower_bound(participants.begin(), participants.end(), *person_itr, comp_participants());
+		// this is how load programatically creates commitments invisible to
+		// client code
+		(*person_itr)->add_Commitment(room_number, time, topic);
 		participants.insert(participant_itr, *person_itr);
 	}
 
@@ -67,7 +68,7 @@ Meeting::~Meeting()
 	// just need to destroy all the commitments associated with everyone
 	// attending this meeting
 
-	// for_each(participants.begin(), participants.end(), [this](Person* p){ p->remove_Commitment(this->time); });
+	for_each(participants.begin(), participants.end(), [this](Person* p){ p->remove_Commitment(this->time); });
 }
 
 // Meeting objects manage their own participant list. Participants
@@ -87,7 +88,7 @@ void Meeting::add_participant(Person* p, int room_number)
 	auto insert_pos = lower_bound(participants.begin(), participants.end(), p, comp_participants());
 
 	// add the commitment
-	// p->add_Commitment(room_number, time, topic);
+	p->add_Commitment(room_number, time, topic);
 	// add the participant
 	participants.insert(insert_pos, p);
 }
@@ -105,7 +106,7 @@ void Meeting::remove_participant(Person* p)
 	auto remove_pos = lower_bound(participants.begin(), participants.end(), p, comp_participants());
 
 	// remove the person's commitment
-	// p->remove_Commitment(time);
+	p->remove_Commitment(time);
 	// remove the person from participants
 	participants.erase(remove_pos);
 }

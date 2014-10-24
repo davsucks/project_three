@@ -30,4 +30,6 @@ void check_time_in_range(int);
 class Room;
 using room_list_t = std::vector<Room>;
 
+void print_message_and_quit();
+
 #endif

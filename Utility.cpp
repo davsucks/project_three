@@ -27,3 +27,9 @@ void check_time_in_range(int time) {
 		throw Error("Time is not in range!");
 	}
 }
+
+void print_message_and_quit()
+{
+	cerr << "Ran out of memory!" << endl;
+	exit(1);
+}

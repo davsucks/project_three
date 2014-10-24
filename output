@@ -1,82 +1,88 @@
 
-Enter command: Person Jones added
+Enter command: Person Scrooge added
 
-Enter command: Person John added
+Enter command: Person Marley added
 
 Enter command: Room 1001 added
 
 Enter command: Room 1002 added
 
-Enter command: There is already a person with this last name!
+Enter command: Meeting added at 10
 
-Enter command: There is already a room with this number!
-
-Enter command: Person Marner added
-
-Enter command: Information for 2 rooms:
---- Room 1001 ---
-No meetings are scheduled
---- Room 1002 ---
-No meetings are scheduled
-
-Enter command: Silas Marner 888
-
-Enter command: Could not read an integer value!
-
-Enter command: Room 5 added
-
-Enter command: Information for 3 rooms:
---- Room 5 ---
-No meetings are scheduled
---- Room 1001 ---
-No meetings are scheduled
---- Room 1002 ---
-No meetings are scheduled
-
-Enter command: There is already a room with this number!
-
-Enter command: Room 6 added
-
-Enter command: Unrecognized command!
-
-Enter command: Could not read an integer value!
-
-Enter command: Information for 4 rooms:
---- Room 5 ---
-No meetings are scheduled
---- Room 6 ---
-No meetings are scheduled
---- Room 1001 ---
-No meetings are scheduled
---- Room 1002 ---
-No meetings are scheduled
-
-Enter command: Room 8 added
-
-Enter command: No room with that number!
+Enter command: Participant Scrooge added
 
 Enter command: Meeting added at 10
 
-Enter command: Information for 5 rooms:
---- Room 5 ---
-No meetings are scheduled
---- Room 6 ---
-No meetings are scheduled
---- Room 8 ---
-Meeting time: 10, Topic: Music
-Participants: None
+Enter command: Person is already committed at that time!
+
+Enter command: Meeting rescheduled to room 1002 at 11
+
+Enter command: Participant Marley added
+
+Enter command: Participant Scrooge added
+
+Enter command: Information for 2 rooms:
 --- Room 1001 ---
-No meetings are scheduled
+Meeting time: 10, Topic: Money
+Participants:
+Ebenezer Scrooge 666
+--- Room 1002 ---
+Meeting time: 11, Topic: Christmas
+Participants:
+Jacob Marley 000
+Ebenezer Scrooge 666
+
+Enter command: Room:1001 Time: 10 Topic: Money
+Room:1002 Time: 11 Topic: Christmas
+
+Enter command: Room:1002 Time: 11 Topic: Christmas
+
+Enter command: Data saved
+
+Enter command: A participant is already committed at the new time!
+
+Enter command: Meeting rescheduled to room 1002 at 9
+
+Enter command: Room:1001 Time: 10 Topic: Money
+Room:1002 Time: 9 Topic: Christmas
+
+Enter command: Room:1002 Time: 9 Topic: Christmas
+
+Enter command: Meeting at 9 deleted
+
+Enter command: Information for 2 rooms:
+--- Room 1001 ---
+Meeting time: 10, Topic: Money
+Participants:
+Ebenezer Scrooge 666
 --- Room 1002 ---
 No meetings are scheduled
 
-Enter command: Person oops! added
+Enter command: Room:1001 Time: 10 Topic: Money
 
-Enter command: Information for 4 people:
-Elton John 456
-Tom Jones 123
-Silas Marner 888
-TomJones123 oops! it_wants_enough_strings_to_complete_the_command
+Enter command: No commitments
+
+Enter command: All meetings deleted
+
+Enter command: No commitments
+
+Enter command: Data loaded
+
+Enter command: Information for 2 rooms:
+--- Room 1001 ---
+Meeting time: 10, Topic: Money
+Participants:
+Ebenezer Scrooge 666
+--- Room 1002 ---
+Meeting time: 11, Topic: Christmas
+Participants:
+Jacob Marley 000
+Ebenezer Scrooge 666
+
+Enter command: Room:1001 Time: 10 Topic: Money
+Room:1002 Time: 11 Topic: Christmas
+
+Enter command: Room:1002 Time: 11 Topic: Christmas
 
 Enter command: All rooms and meetings deleted
 All persons deleted
