@@ -33,7 +33,7 @@ public:
 	// No check made for whether the Meeting already exists or not.
 	// Person list is needed to resolve references to meeting participants
 	// Input for a member variable value is read directly into the member variable.
-	Meeting(std::ifstream& is, const people_list_t& people, int room_number);
+	Meeting(std::ifstream& is, const People_list_t& people, int room_number);
 
 	// used to completely destroy commitments
 	~Meeting();
@@ -48,11 +48,11 @@ public:
 	// are identified by a pointer to that individual's Person object.
 
 	// Add to the list, throw exception if participant was already there.
-	void add_participant(Person* p, int room_number);
+	void add_participant(Person* person_ptr, int room_number);
 	// Return true if the person is a participant, false if not.
-	bool is_participant_present(Person* p) const;
+	bool is_participant_present(Person* person_ptr) const;
 	// Remove from the list, throw exception if participant was not found.
-	void remove_participant(Person* p);
+	void remove_participant(Person* person_ptr);
 
 	// returns true if any participants in this meeting are committed at the new time
 	bool any_participants_committed(int time);

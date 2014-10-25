@@ -2,11 +2,6 @@
 #include "Person.h"
 using namespace std;
 
-void p_person(const Person* p, ostream& os)
-{
-	os << *p << endl;
-}
-
 const int half_day = 12;
 int normalize_time(int time)
 {

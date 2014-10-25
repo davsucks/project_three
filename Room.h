@@ -32,7 +32,7 @@ public:
 	// No check made for whether the Room already exists or not.
 	// Throw Error exception if invalid data discovered in file.
 	// Input for a member variable value is read directly into the member variable.
-	 Room(std::ifstream& is, const people_list_t& people_list);
+	 Room(std::ifstream& is, const People_list_t& people_list);
 
 	 // ~Room();
 

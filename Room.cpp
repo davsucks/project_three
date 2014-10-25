@@ -26,7 +26,11 @@ bool Room::comp_Meetings::operator() (const int& rhs, const int& lhs) const
 	return normalize_time(rhs) < normalize_time(lhs);
 }
 
-void save_meeting(pair<int, Meeting*>, ostream&);
+
+static void save_meeting(pair<int, Meeting*> meeting, ostream& os)
+{
+	meeting.second->save(os);
+}
 
 // Construct a Room from an input file stream in save format, using the people list,
 // restoring all the Meeting information. 
@@ -35,7 +39,7 @@ void save_meeting(pair<int, Meeting*>, ostream&);
 // Throw Error exception if invalid data discovered in file.
 // Input for a member variable value is read directly into the member variable.
 
- Room::Room(std::ifstream& is, const people_list_t& people_list)
+ Room::Room(std::ifstream& is, const People_list_t& people_list)
  {
  	is >> room_number;
 
@@ -109,11 +113,6 @@ void Room::save(std::ostream& os) const
 	os << room_number << " " << meetings.size() << endl;
 	auto bound_save = bind(save_meeting, _1, ref(os));
 	for_each(meetings.begin(), meetings.end(), bound_save);
-}
-
-void save_meeting(pair<int, Meeting*> meeting, ostream& os)
-{
-	meeting.second->save(os);
 }
 	
 // Print the Room data as follows:

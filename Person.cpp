@@ -1,7 +1,6 @@
 #include "Person.h"
 #include "Utility.h"
 #include <algorithm>
-#include <cassert>
 using namespace std;
 
 // Commitment-related headers
@@ -60,14 +59,14 @@ bool Person::has_Commitments()
 // adds a commitment to this person commitments container
 void Person::add_Commitment(int room_no, int time, string topic)
 {
-	Commitment_t* new_commitment;
+	Commitment_t* new_commitment_ptr;
 	try {
-		new_commitment = new Commitment_t(room_no, time, topic);
+		new_commitment_ptr = new Commitment_t(room_no, time, topic);
 	} catch (...) {
 		print_message_and_quit();
 	}
-	commitments.insert(new_commitment);
-	commitment_times.insert(pair<int, Commitment_t*>(time, new_commitment));
+	commitments.insert(new_commitment_ptr);
+	commitment_times.insert(pair<int, Commitment_t*>(time, new_commitment_ptr));
 }
 
 // removes the commitment at the specified time from the persons commitments
@@ -75,10 +74,10 @@ void Person::remove_Commitment(int time)
 {
 	// need to remove the commitment pointer from both containers
 	// and then delete the pointer
-	auto commitment = commitment_times.find(time);
-	commitments.erase(commitment->second);
+	auto commitment_ = commitment_times.find(time);
+	commitments.erase(commitment_->second);
 	commitment_times.erase(time);
-	delete commitment->second;
+	delete commitment_->second;
 }
 
 void Person::print_Commitments()
@@ -93,8 +92,8 @@ void Person::print_Commitments()
 void Person::update_Commitment(int old_time, int new_room_no, int new_time)
 {
 	// grab the topic string from the old commitment
-	auto commitment = commitment_times.find(old_time);
-	string topic = commitment->second->topic;
+	auto commitment_itr = commitment_times.find(old_time);
+	string topic = commitment_itr->second->topic;
 	// remove the old commitment and add the new one
 	remove_Commitment(old_time);
 	add_Commitment(new_room_no, new_time, topic);

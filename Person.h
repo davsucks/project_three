@@ -63,9 +63,7 @@ public:
 	bool operator== (const Person& rhs) const
 		{return lastname == rhs.lastname;}
 
-	friend std::ostream& operator<< (std::ostream& os, const Person& person);
-	friend std::ostream& operator<< (std::ostream& os, const Person* person);
-	
+	friend std::ostream& operator<< (std::ostream& os, const Person& person);	
 
 private:
 	struct Commitment_t {
@@ -81,8 +79,9 @@ private:
 	};
 
 	// two different containers, while slightly redundant, allows for commitment
-	// lookup in logarithmic time since only using one container would
-	// result in a linear search for is_committed_at, which is foribben as per the spec
+	// lookup in logarithmic time since only using one container would result in
+	// either a linear search for is_committed_at, or a linear searches for
+	// printing commitments which is foribben as per the spec
 
 	// the first container maps room number to a commitment pointer
 	using Commitment_times_container_t = std::map<int, Commitment_t*, Comp_Commitments>;

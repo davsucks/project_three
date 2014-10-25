@@ -6,8 +6,8 @@ using namespace std;
 
 // struct used to pass into every command function
 struct Container_t {
-	people_list_t people;
-	room_list_t rooms;
+	People_list_t people;
+	Room_list_t rooms;
 };
 
 
@@ -23,15 +23,15 @@ int read_int();
 int read_room_number();
 int read_time();
 // Person helpers
-Person* get_Person_ptr(people_list_t&, string);
-people_list_t::iterator get_position_for_new_Person(people_list_t&, string);
+Person* get_Person_ptr(People_list_t&, string);
+People_list_t::iterator get_position_for_new_Person(People_list_t&, string);
+// Room helpers
+Room& read_no_and_get_room(Room_list_t&);
+Room_list_t::iterator get_room_itr(Room_list_t&, int);
+Room& get_room(Room_list_t&, int);
 
-Room& read_no_and_get_room(room_list_t&);
-room_list_t::iterator get_room_itr(room_list_t&, int);
-Room& get_room(room_list_t&, int);
-
-void set_container_and_close_file(Container_t& container, ifstream&, people_list_t&, room_list_t&);
-void set_backups(Container_t&, people_list_t&, room_list_t&);
+void set_container_and_close_file(Container_t& container, ifstream&, People_list_t&, Room_list_t&);
+void set_backups(Container_t&, People_list_t&, Room_list_t&);
 
 void pi(Container_t&);
 void pr(Container_t&);
@@ -51,10 +51,10 @@ void dm(Container_t&);
 void dp(Container_t&);
 void ds(Container_t&);
 void dg(Container_t&);
-void dg_no_messages(room_list_t&, people_list_t&);
+void dg_no_messages(Room_list_t&, People_list_t&);
 
 void da(Container_t&);
-void da_no_messages(room_list_t&, people_list_t&);
+void da_no_messages(Room_list_t&, People_list_t&);
 
 void sd(Container_t&);
 void ld(Container_t&);
@@ -182,7 +182,7 @@ int read_int()
 /* this function returns an iterator to the person in the list whos last
    name is lexicographically larger than or equal to the given lastname
    otherwise returns iterator to the end of people */
-people_list_t::iterator get_Person_itr(people_list_t& people, string lastname)
+People_list_t::iterator get_Person_itr(People_list_t& people, string lastname)
 {
 	return find_if_not(people.begin(), people.end(), [lastname](const Person* s) { return s->get_lastname() < lastname; });
 }
@@ -190,7 +190,7 @@ people_list_t::iterator get_Person_itr(people_list_t& people, string lastname)
 // if get_Person_itr returns the correct person (as determined by lastname)
 // returns a pointer to that person, otherwise throws no person with lastname
 // error
-Person* get_Person_ptr(people_list_t& people, string lastname)
+Person* get_Person_ptr(People_list_t& people, string lastname)
 {
 	auto person_itr = get_Person_itr(people, lastname);
 	if (person_itr == people.end() || (*person_itr)->get_lastname() != lastname)
@@ -201,7 +201,7 @@ Person* get_Person_ptr(people_list_t& people, string lastname)
 
 // returns an iterator to the position where a new person with supplied lastname
 // would go. throws an error if a person with that lastname already exists
-people_list_t::iterator get_position_for_new_Person(people_list_t& people, string lastname)
+People_list_t::iterator get_position_for_new_Person(People_list_t& people, string lastname)
 {
 	auto position = get_Person_itr(people, lastname);
 	if (position != people.end() && (*position)->get_lastname() == lastname) {
@@ -215,8 +215,8 @@ void pi(Container_t& container)
 {
 	string lastname;
 	cin >> lastname;
-	auto person = get_Person_ptr(container.people, lastname);
-	cout << *person << endl;
+	auto person_ptr = get_Person_ptr(container.people, lastname);
+	cout << *person_ptr << endl;
 }
 
 // PR and subfunction definitions
@@ -226,14 +226,14 @@ void pr(Container_t& container)
 	cout << room;
 }
 
-Room& read_no_and_get_room(room_list_t& rooms)
+Room& read_no_and_get_room(Room_list_t& rooms)
 {
 	return get_room(rooms, read_room_number());
 }
 
 /*	returns an iterator to the room given by room_number
 	if no room of that number exists, throws the appropriate error */
-room_list_t::iterator get_room_itr(room_list_t& rooms, int room_number)
+Room_list_t::iterator get_room_itr(Room_list_t& rooms, int room_number)
 {
 	Room probe(room_number);
 	auto room_itr = lower_bound(rooms.begin(), rooms.end(), probe);
@@ -245,7 +245,7 @@ room_list_t::iterator get_room_itr(room_list_t& rooms, int room_number)
 }
 
 
-Room& get_room(room_list_t& rooms, int room_number)
+Room& get_room(Room_list_t& rooms, int room_number)
 {
 	auto room_itr = get_room_itr(rooms, room_number);
 	return *room_itr;
@@ -255,8 +255,8 @@ Room& get_room(room_list_t& rooms, int room_number)
 void pm(Container_t& container)
 {
 	Room& room = read_no_and_get_room(container.rooms);
-	const Meeting* meeting = room.get_Meeting(read_time());
-	cout << *meeting;
+	const Meeting* meeting_ptr = room.get_Meeting(read_time());
+	cout << *meeting_ptr;
 }
 
 
@@ -283,7 +283,7 @@ void pg(Container_t& container)
 class Meeting_calculator_t {
 public:
 	// this function sets the sum member variable
-	void operator()(room_list_t& rooms)
+	void operator()(Room_list_t& rooms)
 	{
 		sum = 0;
 		for_each(rooms.begin(), rooms.end(), [this](const Room& r){ this->sum += r.get_number_Meetings(); });
@@ -312,26 +312,26 @@ void pc(Container_t& container)
 	string lastname;
 	cin >> lastname;
 
-	Person* person = get_Person_ptr(container.people, lastname);
-	person->print_Commitments();
+	Person* person_ptr = get_Person_ptr(container.people, lastname);
+	person_ptr->print_Commitments();
 }
 
 void ai(Container_t& container)
 {
 	string firstname, lastname, phoneno;
 	cin >> firstname >> lastname >> phoneno;
-	Person* new_person;
-	people_list_t::iterator position;
+	Person* new_person_ptr;
+	People_list_t::iterator position;
 	try {
-		new_person = new Person(firstname, lastname, phoneno);
+		new_person_ptr = new Person(firstname, lastname, phoneno);
 		position = get_position_for_new_Person(container.people, lastname);
 	} catch(Error& e) {
-		delete new_person;
+		delete new_person_ptr;
 		throw;
 	} catch(bad_alloc& e) {
 		print_message_and_quit();
 	}
-	container.people.insert(position, new_person);
+	container.people.insert(position, new_person_ptr);
 	cout << "Person " << lastname << " added" << endl;
 }
 
@@ -340,10 +340,10 @@ void ar(Container_t& container)
 	int room_number = read_room_number();
 	Room probe(room_number);
 
-	auto insert = lower_bound(container.rooms.begin(), container.rooms.end(), probe);
+	auto new_room_itr = lower_bound(container.rooms.begin(), container.rooms.end(), probe);
 
-	if (insert == container.rooms.end() || *insert != probe) {
-		container.rooms.insert(insert, probe);
+	if (new_room_itr == container.rooms.end() || *new_room_itr != probe) {
+		container.rooms.insert(new_room_itr, probe);
 		cout << "Room " << room_number << " added" << endl;
 		return;
 	}
@@ -359,12 +359,12 @@ void am(Container_t& container)
 	string topic;
 	cin >> topic;
 
-	Meeting* meeting;
+	Meeting* meeting_ptr;
 	try {
-		meeting = new Meeting(time, topic);
-		room.add_Meeting(meeting);
+		meeting_ptr = new Meeting(time, topic);
+		room.add_Meeting(meeting_ptr);
 	} catch (Error& e) {
-		delete meeting;
+		delete meeting_ptr;
 		throw;
 	} catch (bad_alloc& e) {
 		print_message_and_quit();
@@ -377,14 +377,14 @@ void ap(Container_t& container)
 	Room& room = read_no_and_get_room(container.rooms);
 
 	int time = read_time();
-	Meeting* meeting = room.get_Meeting(time);
+	Meeting* meeting_ptr = room.get_Meeting(time);
 
 	string lastname;
 	cin >> lastname;
 
-	Person* person = get_Person_ptr(container.people, lastname);
+	Person* person_ptr = get_Person_ptr(container.people, lastname);
 
-	meeting->add_participant(person, room.get_room_number());
+	meeting_ptr->add_participant(person_ptr, room.get_room_number());
 
 	cout << "Participant " << lastname << " added" << endl;
 }
@@ -397,7 +397,7 @@ void rm(Container_t& container)
 
 	// read and error check old_time
 	int old_time = read_time();
-	Meeting* old_meeting = old_room.get_Meeting(old_time);
+	Meeting* old_meeting_ptr = old_room.get_Meeting(old_time);
 
 	// read and error check new_room_no
 	int new_room_no = read_room_number();
@@ -416,14 +416,14 @@ void rm(Container_t& container)
 	if (new_room.is_Meeting_present(new_time))
 		throw Error("There is already a meeting at that time!");
 	// check whether a change in meeting time causes commitment conflict for a participant
-	if (new_time != old_time && old_meeting->any_participants_committed(new_time))
+	if (new_time != old_time && old_meeting_ptr->any_participants_committed(new_time))
 		throw Error("A participant is already committed at the new time!");
 
-	old_meeting->set_time(new_time);
-	new_room.add_Meeting(old_meeting);
+	old_meeting_ptr->set_time(new_time);
+	new_room.add_Meeting(old_meeting_ptr);
 	// adding was successful, so now remove the old meeting
 	old_room.remove_Meeting(old_time);
-	old_meeting->update_Commitments(old_time, new_room_no, new_time);
+	old_meeting_ptr->update_Commitments(old_time, new_room_no, new_time);
 
 	// now remove old room
 	cout << "Meeting rescheduled to room " << new_room_no << " at " << new_time << endl;
@@ -435,15 +435,16 @@ void di(Container_t& container)
 	cin >> lastname;
 
 	// fetch and error check the person
-	Person* person = get_Person_ptr(container.people, lastname);
+	Person* person_ptr = get_Person_ptr(container.people, lastname);
 
 	// now need to determine if this person is in any meetings
-	if (person->has_Commitments())
+	// use commitments so that room isn't responsible for its participants
+	if (person_ptr->has_Commitments())
 		throw Error("This person is a participant in a meeting!");
 
 	// fetch an iterator to make deleting easier
 	auto person_itr = get_Person_itr(container.people, lastname);
-	delete person;
+	delete person_ptr;
 	container.people.erase(person_itr);
 	cout << "Person " << lastname << " deleted" << endl;
 }
@@ -451,10 +452,12 @@ void di(Container_t& container)
 void dr(Container_t& container)
 {
 	int room_number = read_room_number();
-	room_list_t::iterator room = get_room_itr(container.rooms, room_number);
-
-	room->clear_Meetings();
-	container.rooms.erase(room);
+	// get_room_itr will throw if the room doesn't exist
+	auto room_itr = get_room_itr(container.rooms, room_number);
+	// call clear_meetings to ensure that meeting's (and commitments)
+	// are properly destroyed
+	room_itr->clear_Meetings();
+	container.rooms.erase(room_itr);
 	cout << "Room " << room_number << " deleted" << endl;
 }
 
@@ -463,11 +466,11 @@ void dm(Container_t& container)
 	Room& room = read_no_and_get_room(container.rooms);
 
 	int time = read_time();
-	const Meeting* meeting = room.get_Meeting(time);
+	const Meeting* meeting_ptr = room.get_Meeting(time);
 	room.remove_Meeting(time);
 	// this will trigger meetings destructor, which will deallcoate all 
 	// commitments associated with it
-	delete meeting;
+	delete meeting_ptr;
 	cout << "Meeting at " << time << " deleted" << endl;
 }
 
@@ -477,13 +480,13 @@ void dp(Container_t& container)
 
 	int time = read_time();
 
-	Meeting* meeting = room.get_Meeting(time);
+	Meeting* meeting_ptr = room.get_Meeting(time);
 
 	string lastname;
 	cin >> lastname;
 	Person* person = get_Person_ptr(container.people, lastname);
 
-	meeting->remove_participant(person);
+	meeting_ptr->remove_participant(person);
 
 	cout << "Participant " << lastname << " deleted" << endl;
 }
@@ -501,7 +504,7 @@ void dg(Container_t& container)
 	cout << "All persons deleted" << endl;
 }
 
-void dg_no_messages(room_list_t& rooms, people_list_t& people)
+void dg_no_messages(Room_list_t& rooms, People_list_t& people)
 {
 	// the one range for
 	for (Room& r : rooms) {
@@ -524,7 +527,7 @@ void da(Container_t& container)
 	dg(container);
 }
 
-void da_no_messages(room_list_t& rooms, people_list_t& people)
+void da_no_messages(Room_list_t& rooms, People_list_t& people)
 {
 	for_each(rooms.begin(), rooms.end(), [](Room& r){ r.clear_Meetings(); });
 	rooms.clear();
@@ -556,13 +559,13 @@ void sd(Container_t& container)
 	cout << "Data saved" << endl;
 }
 
-void set_container_and_close_file(Container_t& container, ifstream& file, people_list_t& people_backup, room_list_t& rooms_backup)
+void set_container_and_close_file(Container_t& container, ifstream& file, People_list_t& people_backup, Room_list_t& rooms_backup)
 {
 	set_backups(container, people_backup, rooms_backup);
 	file.close();
 }
 
-void set_backups(Container_t& container, people_list_t& people_backup, room_list_t& rooms_backup)
+void set_backups(Container_t& container, People_list_t& people_backup, Room_list_t& rooms_backup)
 {
 	container.people.swap(people_backup);
 	container.rooms.swap(rooms_backup);
@@ -588,8 +591,8 @@ void ld(Container_t& container)
 	// that way if loading succeeds we just swap these lists
 	// with the container lists
 	// otherwise, just clear these lists and move on
-	room_list_t new_room_list;
-	people_list_t new_people_list;
+	Room_list_t new_room_list;
+	People_list_t new_people_list;
 
 	try {
 	// first read in the max number of people
@@ -600,11 +603,11 @@ void ld(Container_t& container)
 
 	for (int i = 0; i < max; ++i) {
 		// read in each person
-		Person* new_person;
+		Person* new_person_ptr;
 		try {
-		new_person = new Person(input_file);
+		new_person_ptr = new Person(input_file);
 		// use push back since the person list will be in alphabetical order
-		new_people_list.push_back(new_person);
+		new_people_list.push_back(new_person_ptr);
 		} catch (bad_alloc& e) {
 			print_message_and_quit();
 		}
@@ -617,8 +620,8 @@ void ld(Container_t& container)
 	for (int i = 0; i < max; ++i) {
 		// read in each room
 		Room new_room(input_file, new_people_list);
-		room_list_t::iterator position = lower_bound(new_room_list.begin(), new_room_list.end(), new_room);
-		new_room_list.insert(position, new_room);
+		// use push back since rooms will be ordered by room number
+		new_room_list.push_back(new_room);
 	}
 	// done!
 	} catch(Error& e) {

@@ -24,14 +24,17 @@ bool Meeting::comp_participants::operator() (const Person* lhs, const Person* rh
 }
 
 // HELPER FUNCTION
-void save_person(const Person*, std::ostream&);
+static void save_person(const Person* person_ptr, std::ostream& os)
+{
+	person_ptr->save(os);
+}
 
 // Construct a Meeting from an input file stream in save format
 // Throw Error exception if invalid data discovered in file.
 // No check made for whether the Meeting already exists or not.
 // Person list is needed to resolve references to meeting participants
 // Input for a member variable value is read directly into the member variable.
-Meeting::Meeting(std::ifstream& is, const people_list_t& people, int room_number)
+Meeting::Meeting(std::ifstream& is, const People_list_t& people, int room_number)
 {
 	int num_participants;
 	is >> time;
@@ -74,38 +77,38 @@ Meeting::~Meeting()
 // are identified by a pointer to that individual's Person object.
 
 // Add to the list, throw exception if participant was already there.
-void Meeting::add_participant(Person* p, int room_number)
+void Meeting::add_participant(Person* person_ptr, int room_number)
 {
 	// need to probe the participants list
-	if (is_participant_present(p))
+	if (is_participant_present(person_ptr))
 		throw Error("This person is already a participant!");
 
 	// make sure the person isn't already committed
-	if (p->is_committed_at(time))
+	if (person_ptr->is_committed_at(time))
 		throw Error("Person is already committed at that time!");
 
-	auto insert_pos = lower_bound(participants.begin(), participants.end(), p, comp_participants());
+	auto insert_pos = lower_bound(participants.begin(), participants.end(), person_ptr, comp_participants());
 
 	// add the commitment
-	p->add_Commitment(room_number, time, topic);
+	person_ptr->add_Commitment(room_number, time, topic);
 	// add the participant
-	participants.insert(insert_pos, p);
+	participants.insert(insert_pos, person_ptr);
 }
 // Return true if the person is a participant, false if not.
-bool Meeting::is_participant_present(Person* p) const
+bool Meeting::is_participant_present(Person* person_ptr) const
 {
-	return binary_search(participants.begin(), participants.end(), p, comp_participants());
+	return binary_search(participants.begin(), participants.end(), person_ptr, comp_participants());
 }
 // Remove from the list, throw exception if participant was not found.
-void Meeting::remove_participant(Person* p)
+void Meeting::remove_participant(Person* person_ptr)
 {
-	if (!is_participant_present(p))
+	if (!is_participant_present(person_ptr))
 		throw Error("This person is not a participant in the meeting!" );
 
-	auto remove_pos = lower_bound(participants.begin(), participants.end(), p, comp_participants());
+	auto remove_pos = lower_bound(participants.begin(), participants.end(), person_ptr, comp_participants());
 
 	// remove the person's commitment
-	p->remove_Commitment(time);
+	person_ptr->remove_Commitment(time);
 	// remove the person from participants
 	participants.erase(remove_pos);
 }
@@ -128,11 +131,6 @@ void Meeting::save(std::ostream& os) const
 	// bind save_person
 	auto bound_save = bind(save_person, _1, ref(os));
 	for_each(participants.begin(), participants.end(), bound_save);
-}
-
-void save_person(const Person* person, std::ostream& os)
-{
-	person->save(os);
 }
 
 // This operator defines the order relation between meetings, based just on the time

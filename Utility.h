@@ -16,16 +16,14 @@ struct Error {
 
 int normalize_time(int);
 
+// Declare types 
 // forward declare class Person
 class Person;
-void p_person(const Person*, std::ostream&);
-
-// Declare types 
-using people_list_t = std::list<Person*>;
+using People_list_t = std::list<Person*>;
 
 // forward declare class Room
 class Room;
-using room_list_t = std::vector<Room>;
+using Room_list_t = std::vector<Room>;
 
 void print_message_and_quit();
 
